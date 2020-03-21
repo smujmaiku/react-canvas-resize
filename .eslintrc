@@ -1,0 +1,36 @@
+{
+	"extends": [
+		"standard",
+		"plugin:react/recommended"
+	],
+	"plugins": [
+		"standard"
+	],
+	"rules": {
+		"semi": [
+			"error",
+			"always"
+		],
+		"indent": [
+			2,
+			"tab"
+		],
+		"no-tabs": 0,
+		"space-before-function-paren": 0,
+		"comma-dangle": [
+			"error",
+			"always-multiline"
+		]
+	},
+	"settings": {
+		"react": {
+			"createClass": "createReactClass",
+			"version": "detect"
+		}
+	},
+	"env": {
+		"node": true,
+		"browser": true,
+		"jest": true
+	}
+}

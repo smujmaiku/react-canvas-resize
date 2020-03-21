@@ -1,0 +1,46 @@
+{
+  "name": "react-canvas-resize",
+  "version": "0.1.0",
+  "description": "A canvas wrapper that resizes",
+  "main": "dist/CanvasResize.js",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "jest --watch",
+    "test:ci": "jest",
+    "test:coverage": "jest --coverage",
+    "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls",
+    "build": "rm -rf dist && mkdir dist && npx babel src/CanvasResize.js --out-file dist/CanvasResize.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smujmaiku/react-canvas-resize.git"
+  },
+  "author": "Michael Szmadzinski",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/smujmaiku/react-canvas-resize/issues"
+  },
+  "homepage": "https://github.com/smujmaiku/react-canvas-resize#readme",
+  "dependencies": {
+    "moremath-js": "github:smujmaiku/moremath-js",
+    "prop-types": "^15.7.2",
+    "react": "^16.13.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.0",
+    "@babel/preset-react": "^7.9.1",
+    "coveralls": "^3.0.11",
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.19.0",
+    "eslint-plugin-standard": "^4.0.1",
+    "jest": "^25.1.0",
+    "react-dom": "^16.13.1",
+    "react-test-renderer": "^16.13.1"
+  }
+}
