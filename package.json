@@ -1,15 +1,15 @@
 {
   "name": "react-canvas-resize",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A canvas wrapper that resizes",
-  "main": "dist/CanvasResize.js",
+  "main": "lib/CanvasResize.js",
   "scripts": {
     "lint": "eslint .",
     "test": "jest --watch",
     "test:ci": "jest",
     "test:coverage": "jest --coverage",
     "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls",
-    "build": "rm -rf dist && mkdir dist && npx babel src/CanvasResize.js --out-file dist/CanvasResize.js"
+    "build": "rm -rf lib && mkdir lib && npx babel src/CanvasResize.js --out-file lib/CanvasResize.js"
   },
   "repository": {
     "type": "git",
@@ -22,7 +22,6 @@
   },
   "homepage": "https://github.com/smujmaiku/react-canvas-resize#readme",
   "dependencies": {
-    "moremath-js": "github:smujmaiku/moremath-js",
     "prop-types": "^15.7.2",
     "react": "^16.13.1"
   },

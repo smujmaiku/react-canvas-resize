@@ -1,5 +1,5 @@
 # build
-dist
+lib
 
 # npm
 node_modules

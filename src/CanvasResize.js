@@ -4,91 +4,100 @@
  * MIT Licensed
  */
 
-import React from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { containBox } from 'moremath-js';
 
-class Canvas extends React.Component {
-	constructor(props) {
-		super(props);
+/**
+ * Reduces a box inside a container
+ * @param {Array} box
+ * @param {Array} container
+ * @param {Function?} reducer
+ * @returns {Array}
+ */
+function containBox(box, container, reducer = Math.min) {
+	if (container.length < 2) return container;
 
-		this.loopCount = -1;
-		this.canvasRef = React.createRef();
-	}
+	const scales = container.map((v, i) => v / box[i]);
+	const scale = scales.reduce((a, b) => reducer(a, b));
+	return box.map(v => v * scale);
+};
 
-	componentWillUnmount() {
-		cancelAnimationFrame(this.drawCanvasI);
-		this.drawCanvasI = 'STOP';
-	}
+/**
+ * Animation Frame Hook
+ * @param {Function} fn
+ */
+export function useAnimationFrame(fn) {
+	useEffect(() => {
+		let timer;
+		let count = -1;
 
-	drawCanvas() {
-		const now = Date.now();
+		const handleFrame = () => {
+			const now = Date.now();
+			count++;
 
-		cancelAnimationFrame(this.drawCanvasI);
-		delete this.drawCanvasI;
-		this.requestDrawCanvas();
+			cancelAnimationFrame(timer);
+			timer = requestAnimationFrame(handleFrame);
 
-		const {
-			props,
-			canvasRef,
-			loopCount,
-		} = this;
+			try {
+				fn({ now, count });
+			} catch (e) {
+				count--;
+			}
+		};
 
-		const {
-			onInit,
-			onDraw,
-		} = props;
+		handleFrame();
 
-		this.loopCount++;
+		return () => {
+			cancelAnimationFrame(timer);
+		};
+	}, [fn]);
+}
+
+export function Canvas(props) {
+	const {
+		width,
+		height,
+		onInit,
+		onDraw,
+		...otherProps
+	} = props;
+
+	const canvasRef = useRef();
+
+	const drawCanvas = useCallback(({ now, count }) => {
 		const canvas = canvasRef.current;
+		if (!canvas) {
+			throw new Error('Canvas is not ready');
+		}
 
-		if (!this.sentInit) {
-			this.sentInit = true;
+		if (count === 0 && onInit) {
 			onInit({
 				canvas,
 			});
 		}
 
-		onDraw({
-			canvas,
-			now,
-			count: loopCount,
-		});
-	}
+		if (onDraw) {
+			onDraw({
+				canvas,
+				now,
+				count,
+			});
+		}
+	}, [canvasRef, onInit, onDraw]);
 
-	requestDrawCanvas() {
-		if (this.drawCanvasI) return;
-		this.drawCanvasI = requestAnimationFrame(() => this.drawCanvas());
-	}
+	useAnimationFrame(drawCanvas);
 
-	render() {
-		this.requestDrawCanvas();
-
-		const {
-			props,
-			canvasRef,
-		} = this;
-
-		const {
-			width,
-			height,
-			onInit,
-			onDraw,
-			...otherProps
-		} = props;
-
-		return <canvas
-			ref={canvasRef}
-			width={width}
-			height={height}
-			{...otherProps}
-		/>;
-	}
+	return <canvas
+		ref={canvasRef}
+		width={width}
+		height={height}
+		{...otherProps}
+	/>;
 }
 
 Canvas.defaultProps = {
-	onInit: () => {},
-	onDraw: () => {},
+	onInit: undefined,
+	onDraw: undefined,
 };
 
 Canvas.propTypes = {
@@ -98,48 +107,28 @@ Canvas.propTypes = {
 	onDraw: PropTypes.func,
 };
 
-class CanvasResize extends React.Component {
-	constructor(props) {
-		super(props);
+export default function CanvasResize(props) {
+	const {
+		style,
+		canvasProps,
+		ratio,
+		onInit,
+		onDraw,
+		onResize,
+		...otherProps
+	} = props;
 
-		this.state = {
-			left: 0,
-			top: 0,
-			width: 1,
-			height: 1,
-		};
+	const [size, setSize] = useState({
+		left: 0,
+		top: 0,
+		width: 1,
+		height: 1,
+	});
 
-		this.rootRef = React.createRef();
-		this.canvasRef = React.createRef();
-	}
+	const rootRef = useRef();
+	const canvasRef = useRef();
 
-	shouldComponentUpdate(props, state) {
-		for (const key of ['left', 'top', 'width', 'height']) {
-			if (this.state[key] !== state[key]) return true;
-		}
-
-		for (const key of Object.keys(props)) {
-			if (this.props[key] !== props[key]) return true;
-		}
-
-		return false;
-	}
-
-	componentWillUnmount() {
-		cancelAnimationFrame(this.drawCanvasI);
-		this.drawCanvasI = 'STOP';
-	}
-
-	handleDraw(opts) {
-		this.checkResize();
-
-		this.props.onDraw(opts);
-	}
-
-	checkResize() {
-		const { rootRef, props, state } = this;
-		const { ratio, onResize } = props;
-
+	const checkResize = useCallback(() => {
 		const root = rootRef.current;
 		if (!root) return;
 
@@ -165,59 +154,40 @@ class CanvasResize extends React.Component {
 			}
 		}
 
-		if (Object.entries(size).some(([key, value]) => value !== state[key])) {
-			onResize({ ...size });
-			this.setState(size);
-		}
-	}
+		setSize(orig => {
+			if (Object.entries(size).some(([key, value]) => value !== orig[key])) {
+				onResize({ ...size });
+				return size;
+			} else {
+				return orig;
+			}
+		});
+	}, [ratio, rootRef, onResize]);
 
-	render() {
-		const {
-			props,
-			state,
-			rootRef,
-			canvasRef,
-		} = this;
+	useAnimationFrame(checkResize);
 
-		const {
-			style,
-			ratio,
-			canvasProps,
-			onInit,
-			onResize,
-			onDraw,
-			...otherProps
-		} = props;
-
-		const {
-			left,
-			top,
-			width,
-			height,
-		} = state;
-
-		return <div
-			ref={rootRef}
+	return <div
+		ref={rootRef}
+		style={{
+			...style,
+			padding: 0,
+		}}
+		{...otherProps}
+	>
+		<Canvas
+			ref={canvasRef}
 			style={{
-				...style,
-				padding: 0,
+				margin: 0,
+				marginLeft: size.left,
+				marginTop: size.top,
 			}}
-			{...otherProps}
-		>
-			<Canvas
-				ref={canvasRef}
-				style={{
-					margin: 0,
-					marginLeft: left,
-					marginTop: top,
-				}}
-				width={width}
-				height={height}
-				onDraw={(opts) => this.handleDraw(opts)}
-				{...canvasProps}
-			/>
-		</div>;
-	}
+			width={size.width}
+			height={size.height}
+			onInit={onInit}
+			onDraw={onDraw}
+			{...canvasProps}
+		/>
+	</div>;
 }
 
 CanvasResize.defaultProps = {
@@ -236,10 +206,4 @@ CanvasResize.propTypes = {
 	onInit: PropTypes.func,
 	onDraw: PropTypes.func,
 	onResize: PropTypes.func,
-};
-
-export default CanvasResize;
-
-export {
-	Canvas,
 };
