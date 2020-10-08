@@ -2,11 +2,14 @@ import React from 'react';
 import Canvas from './CanvasResize';
 import './App.css';
 
-function handleDraw({canvas, now}) {
+function handleDraw({canvas, now, fps, interval}) {
 	const {
 		width,
 		height,
 	} = canvas;
+
+	// Limit FPS
+	// if(interval < 1000 / 20) throw new Error();
 
 	const ctx = canvas.getContext('2d');
 	ctx.clearRect(0, 0, width, height);
@@ -30,6 +33,9 @@ function handleDraw({canvas, now}) {
 	ctx.stroke();
 
 	ctx.restore();
+
+	ctx.fillText(`fps: ${fps}`, 10,20)
+	ctx.fillText(`interval: ${interval}`, 10,35)
 }
 
 function App() {

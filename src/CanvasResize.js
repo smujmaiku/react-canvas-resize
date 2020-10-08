@@ -29,19 +29,28 @@ function containBox(box, container, reducer = Math.min) {
 export function useAnimationFrame(fn) {
 	useEffect(() => {
 		let timer;
-		let count = -1;
+		let count = 0;
+		const frameTimes = [];
 
 		const handleFrame = () => {
 			const now = Date.now();
-			count++;
+			const interval = now - frameTimes[frameTimes.length - 1];
+			frameTimes.push(now);
+
+			while (frameTimes.length > 2 && frameTimes[0] < now - 1000) {
+				frameTimes.shift();
+			}
+			const minFrameTime = Math.min(frameTimes[0], now - 500);
+			const fps = Math.round((frameTimes.length - 1) / (now - minFrameTime) * 1000);
 
 			cancelAnimationFrame(timer);
 			timer = requestAnimationFrame(handleFrame);
 
 			try {
-				fn({ now, count });
+				fn({ count, now, interval, fps });
+				count++;
 			} catch (e) {
-				count--;
+				frameTimes.pop();
 			}
 		};
 
@@ -64,7 +73,9 @@ export function Canvas(props) {
 
 	const canvasRef = useRef();
 
-	const drawCanvas = useCallback(({ now, count }) => {
+	const drawCanvas = useCallback((opts) => {
+		const { count } = opts;
+
 		const canvas = canvasRef.current;
 		if (!canvas) {
 			throw new Error('Canvas is not ready');
@@ -79,8 +90,7 @@ export function Canvas(props) {
 		if (onDraw) {
 			onDraw({
 				canvas,
-				now,
-				count,
+				...opts,
 			});
 		}
 	}, [canvasRef, onInit, onDraw]);
