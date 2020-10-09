@@ -64,6 +64,59 @@ export function useAnimationFrame(fn: (frame: FrameFnProps) => void): void {
 	}, [fn]);
 }
 
+interface CanvasBoxInterface {
+	left: number;
+	top: number;
+	width: number;
+	height: number;
+};
+
+export function useContainBox(ref: React.MutableRefObject<HTMLElement>, ratio: number[]) {
+	const [box, setBox] = useState<CanvasBoxInterface>({
+		left: 0,
+		top: 0,
+		width: 1,
+		height: 1,
+	});
+
+	const checkResize = useCallback(() => {
+		const root = ref.current;
+		if (!root) return;
+
+		const { offsetWidth, offsetHeight } = root;
+
+		const newBox: CanvasBoxInterface = {
+			left: 0,
+			top: 0,
+			width: offsetWidth,
+			height: offsetHeight,
+		};
+
+		if (ratio.length === 2 && ratio.every(Boolean)) {
+			[newBox.width, newBox.height] = containBox(
+				ratio,
+				[offsetWidth, offsetHeight],
+			);
+			newBox.left = Math.floor((offsetWidth - newBox.width) / 2);
+			newBox.top = Math.floor((offsetHeight - newBox.height) / 2);
+			newBox.width = Math.floor(newBox.width);
+			newBox.height = Math.floor(newBox.height);
+		}
+
+		setBox((orig: CanvasBoxInterface) => {
+			if (newBox.width === orig.width && newBox.height === orig.height &&
+				newBox.left === orig.left && newBox.top === orig.top) {
+				return orig;
+			}
+			return newBox;
+		});
+	}, [ratio, ref]);
+
+	useAnimationFrame(checkResize);
+
+	return box;
+}
+
 interface CanvasProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement> {
 	width: number;
 	height: number;
@@ -115,15 +168,8 @@ export function Canvas(props: CanvasProps) {
 	/>;
 };
 
-interface CanvasBoxInterface {
-	left: number;
-	top: number;
-	width: number;
-	height: number;
-};
-
 interface CanvasResizeProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
-	canvasProps?: CanvasProps;
+	canvasProps?: React.DetailedHTMLProps<React.HTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>;
 	ratio: number[];
 	onInit?: (canvas: HTMLCanvasElement) => void;
 	onDraw?: (frame: FrameFnProps) => void;
@@ -135,61 +181,23 @@ interface CanvasResizeProps extends React.DetailedHTMLProps<React.HTMLAttributes
  */
 export default function CanvasResize(props: CanvasResizeProps) {
 	const {
-		canvasProps,
+		canvasProps = {},
 		ratio,
 		onInit,
 		onDraw,
 		onResize,
-		style,
+		style = {},
 		...otherProps
 	} = props;
 
-	const [box, setBox] = useState<CanvasBoxInterface>({
-		left: 0,
-		top: 0,
-		width: 1,
-		height: 1,
-	});
-
 	const rootRef = useRef<HTMLDivElement>(null);
 
-	const checkResize = useCallback(() => {
-		const root = rootRef.current;
-		if (!root) return;
+	const box = useContainBox(rootRef, ratio);
 
-		const { offsetWidth, offsetHeight } = root;
-
-		const newBox: CanvasBoxInterface = {
-			left: 0,
-			top: 0,
-			width: offsetWidth,
-			height: offsetHeight,
-		};
-
-		if (ratio.length === 2 && ratio.every(Boolean)) {
-			[newBox.width, newBox.height] = containBox(
-				ratio,
-				[offsetWidth, offsetHeight],
-			);
-			newBox.left = Math.floor((offsetWidth - newBox.width) / 2);
-			newBox.top = Math.floor((offsetHeight - newBox.height) / 2);
-			newBox.width = Math.floor(newBox.width);
-			newBox.height = Math.floor(newBox.height);
-		}
-
-		setBox((orig: CanvasBoxInterface) => {
-			if (newBox.width === orig.width && newBox.height === orig.height &&
-				newBox.left === orig.left && newBox.top === orig.top) {
-				return orig;
-			}
-			if (onResize) {
-				onResize(newBox);
-			}
-			return newBox;
-		});
-	}, [ratio, rootRef, onResize]);
-
-	useAnimationFrame(checkResize);
+	useEffect(() => {
+		if (!onResize) return;
+		onResize(box);
+	}, [box, onResize]);
 
 	return <div
 		{...otherProps}
@@ -197,12 +205,13 @@ export default function CanvasResize(props: CanvasResizeProps) {
 		style={{
 			...style,
 			padding: 0,
+			overflow: 'hidden',
 		}}
 	>
 		<Canvas
 			{...canvasProps}
 			style={{
-				...(canvasProps?.style || {}),
+				...(canvasProps.style || {}),
 				margin: 0,
 				marginLeft: box.left,
 				marginTop: box.top,
