@@ -1,5 +1,5 @@
 import React from 'react';
-import Canvas from './CanvasResize';
+import Canvas from 'react-canvas-resize';
 import './App.css';
 
 function handleDraw({canvas, now, fps, interval}) {

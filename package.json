@@ -1,15 +1,15 @@
 {
   "name": "react-canvas-resize",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "A canvas wrapper that resizes",
   "main": "lib/CanvasResize.js",
+  "types": "lib/CanvasResize.d.ts",
   "scripts": {
-    "lint": "eslint .",
+    "build": "tsc",
+    "lint": "eslint '*/**/*.ts'",
     "test": "jest --watch",
     "test:ci": "jest",
-    "test:coverage": "jest --coverage",
-    "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls",
-    "build": "rm -rf lib && mkdir lib && npx babel src/CanvasResize.js --out-file lib/CanvasResize.js"
+    "test:coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -22,7 +22,6 @@
   },
   "homepage": "https://github.com/smujmaiku/react-canvas-resize#readme",
   "dependencies": {
-    "prop-types": "^15.7.2",
     "react": "^16.13.1"
   },
   "devDependencies": {
@@ -30,6 +29,13 @@
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
     "@babel/preset-react": "^7.9.1",
+    "@types/jest": "^26.0.10",
+    "@types/node": "^14.6.0",
+    "@types/react": "^16.9.45",
+    "@types/react-dom": "^16.9.8",
+    "@types/react-router-dom": "^5.1.5",
+    "@typescript-eslint/eslint-plugin": "^3.10.1",
+    "@typescript-eslint/parser": "^3.10.1",
     "coveralls": "^3.0.11",
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.1",
@@ -40,6 +46,7 @@
     "eslint-plugin-standard": "^4.0.1",
     "jest": "^25.1.0",
     "react-dom": "^16.13.1",
-    "react-test-renderer": "^16.13.1"
+    "react-test-renderer": "^16.13.1",
+    "typescript": "^4.0.2"
   }
 }

@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+    ],
+    "esModuleInterop": true,
+    "target": "es2017",
+    "module": "commonjs",
+    "declaration": true,
+    "jsx": "react",
+    "outDir": "./lib"
+  },
+  "include": [
+    "./src"
+  ],
+  "exclude": [
+    "node_modules",
+    "coverage",
+    "lib",
+    "**/*.test.*"
+  ]
+}

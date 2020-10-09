@@ -5,32 +5,34 @@
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import PropTypes from 'prop-types';
 
 /**
  * Reduces a box inside a container
- * @param {Array} box
- * @param {Array} container
- * @param {Function?} reducer
- * @returns {Array}
+ * smujmaiku/moremath-js<https://github.com/smujmaiku/moremath-js>
  */
-function containBox(box, container, reducer = Math.min) {
+export function containBox(box: number[], container: number[]): number[] {
 	if (container.length < 2) return container;
 
 	const scales = container.map((v, i) => v / box[i]);
-	const scale = scales.reduce((a, b) => reducer(a, b));
+	const scale = scales.reduce((a, b) => Math.min(a, b));
 	return box.map(v => v * scale);
 };
 
+interface FrameFnProps {
+	count: number;
+	now: number;
+	interval: number;
+	fps: number;
+}
+
 /**
  * Animation Frame Hook
- * @param {Function} fn
  */
-export function useAnimationFrame(fn) {
+export function useAnimationFrame(fn: (frame: FrameFnProps) => void): void {
 	useEffect(() => {
-		let timer;
+		let timer: number;
 		let count = 0;
-		const frameTimes = [];
+		const frameTimes: number[] = [];
 
 		const handleFrame = () => {
 			const now = Date.now();
@@ -62,7 +64,17 @@ export function useAnimationFrame(fn) {
 	}, [fn]);
 }
 
-export function Canvas(props) {
+interface CanvasProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement> {
+	width: number;
+	height: number;
+	onInit?: (canvas: HTMLCanvasElement) => void;
+	onDraw?: (frame: FrameFnProps) => void;
+}
+
+/**
+ * Canvas React Element
+ */
+export function Canvas(props: CanvasProps) {
 	const {
 		width,
 		height,
@@ -71,7 +83,7 @@ export function Canvas(props) {
 		...otherProps
 	} = props;
 
-	const canvasRef = useRef();
+	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	const drawCanvas = useCallback((opts) => {
 		const { count } = opts;
@@ -82,9 +94,7 @@ export function Canvas(props) {
 		}
 
 		if (count === 0 && onInit) {
-			onInit({
-				canvas,
-			});
+			onInit(canvas);
 		}
 
 		if (onDraw) {
@@ -98,45 +108,50 @@ export function Canvas(props) {
 	useAnimationFrame(drawCanvas);
 
 	return <canvas
+		{...otherProps}
 		ref={canvasRef}
 		width={width}
 		height={height}
-		{...otherProps}
 	/>;
+};
+
+interface CanvasBoxInterface {
+	left: number;
+	top: number;
+	width: number;
+	height: number;
+};
+
+interface CanvasResizeProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
+	canvasProps?: CanvasProps;
+	ratio: number[];
+	onInit?: (canvas: HTMLCanvasElement) => void;
+	onDraw?: (frame: FrameFnProps) => void;
+	onResize?: (box: CanvasBoxInterface) => void;
 }
 
-Canvas.defaultProps = {
-	onInit: undefined,
-	onDraw: undefined,
-};
-
-Canvas.propTypes = {
-	width: PropTypes.number.isRequired,
-	height: PropTypes.number.isRequired,
-	onInit: PropTypes.func,
-	onDraw: PropTypes.func,
-};
-
-export default function CanvasResize(props) {
+/**
+ * Resizing Canvas React Element
+ */
+export default function CanvasResize(props: CanvasResizeProps) {
 	const {
-		style,
 		canvasProps,
 		ratio,
 		onInit,
 		onDraw,
 		onResize,
+		style,
 		...otherProps
 	} = props;
 
-	const [size, setSize] = useState({
+	const [box, setBox] = useState<CanvasBoxInterface>({
 		left: 0,
 		top: 0,
 		width: 1,
 		height: 1,
 	});
 
-	const rootRef = useRef();
-	const canvasRef = useRef();
+	const rootRef = useRef<HTMLDivElement>(null);
 
 	const checkResize = useCallback(() => {
 		const root = rootRef.current;
@@ -144,7 +159,7 @@ export default function CanvasResize(props) {
 
 		const { offsetWidth, offsetHeight } = root;
 
-		const size = {
+		const newBox: CanvasBoxInterface = {
 			left: 0,
 			top: 0,
 			width: offsetWidth,
@@ -152,68 +167,50 @@ export default function CanvasResize(props) {
 		};
 
 		if (ratio.length === 2 && ratio.every(Boolean)) {
-			[size.width, size.height] = containBox(
+			[newBox.width, newBox.height] = containBox(
 				ratio,
 				[offsetWidth, offsetHeight],
 			);
-			size.left = (offsetWidth - size.width) / 2;
-			size.top = (offsetHeight - size.height) / 2;
-
-			for (const key of Object.keys(size)) {
-				size[key] = Math.floor(size[key]);
-			}
+			newBox.left = Math.floor((offsetWidth - newBox.width) / 2);
+			newBox.top = Math.floor((offsetHeight - newBox.height) / 2);
+			newBox.width = Math.floor(newBox.width);
+			newBox.height = Math.floor(newBox.height);
 		}
 
-		setSize(orig => {
-			if (Object.entries(size).some(([key, value]) => value !== orig[key])) {
-				onResize({ ...size });
-				return size;
-			} else {
+		setBox((orig: CanvasBoxInterface) => {
+			if (newBox.width === orig.width && newBox.height === orig.height &&
+				newBox.left === orig.left && newBox.top === orig.top) {
 				return orig;
 			}
+			if (onResize) {
+				onResize(newBox);
+			}
+			return newBox;
 		});
 	}, [ratio, rootRef, onResize]);
 
 	useAnimationFrame(checkResize);
 
 	return <div
+		{...otherProps}
 		ref={rootRef}
 		style={{
 			...style,
 			padding: 0,
 		}}
-		{...otherProps}
 	>
 		<Canvas
-			ref={canvasRef}
+			{...canvasProps}
 			style={{
+				...(canvasProps?.style || {}),
 				margin: 0,
-				marginLeft: size.left,
-				marginTop: size.top,
+				marginLeft: box.left,
+				marginTop: box.top,
 			}}
-			width={size.width}
-			height={size.height}
+			width={box.width}
+			height={box.height}
 			onInit={onInit}
 			onDraw={onDraw}
-			{...canvasProps}
 		/>
 	</div>;
 }
-
-CanvasResize.defaultProps = {
-	style: {},
-	canvasProps: {},
-	ratio: [],
-	onInit: () => {},
-	onDraw: () => {},
-	onResize: () => {},
-};
-
-CanvasResize.propTypes = {
-	style: PropTypes.object,
-	canvasProps: PropTypes.object,
-	ratio: PropTypes.array,
-	onInit: PropTypes.func,
-	onDraw: PropTypes.func,
-	onResize: PropTypes.func,
-};
