@@ -2,17 +2,31 @@ import React from 'react';
 import Canvas from 'react-canvas-resize';
 import './App.css';
 
-function handleDraw({canvas, now, fps, interval}) {
+function handleDraw({canvas, now, fps, interval, box}) {
 	const {
 		width,
 		height,
-	} = canvas;
+		left,
+		top,
+		fullWidth,
+		fullHeight,
+	} = box;
 
 	// Limit FPS
 	// if(interval < 1000 / 20) throw new Error();
 
 	const ctx = canvas.getContext('2d');
-	ctx.clearRect(0, 0, width, height);
+	ctx.clearRect(0, 0, fullWidth, fullHeight);
+
+	ctx.save();
+
+	ctx.translate(left, top);
+	ctx.strokeStyle = '#111';
+	ctx.strokeRect(2, 2, width - 4, height - 4)
+
+	ctx.restore();
+
+	ctx.save();
 
 	const scale = Math.min(width, height)
 	const sx = Math.cos((now) / 300) * scale / 2.1;
@@ -20,11 +34,7 @@ function handleDraw({canvas, now, fps, interval}) {
 	const ex = Math.cos((now + 100) / 300) * scale / 2.1;
 	const ey = Math.sin((now + 100) / 120) * scale / 2.1;
 
-	ctx.clearRect(0, 0, width, height);
-
-	ctx.save();
-
-	ctx.translate(width / 2, height / 2);
+	ctx.translate(left + width / 2, top + height / 2);
 	ctx.lineWidth = scale / 20;
 	ctx.strokeStyle = '#F43';
 	ctx.beginPath();
@@ -49,6 +59,7 @@ function App() {
 				canvasProps={{
 					className: "canvas"
 				}}
+				fillCanvas
 			/>
 		</div>
 	);

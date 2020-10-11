@@ -69,14 +69,21 @@ interface CanvasBoxInterface {
 	top: number;
 	width: number;
 	height: number;
+	fullWidth: number;
+	fullHeight: number;
 };
 
+/**
+ * Contained box based on ref hook
+ */
 export function useContainBox(ref: React.MutableRefObject<HTMLElement>, ratio: number[]) {
 	const [box, setBox] = useState<CanvasBoxInterface>({
 		left: 0,
 		top: 0,
 		width: 1,
 		height: 1,
+		fullWidth: 1,
+		fullHeight: 1,
 	});
 
 	const checkResize = useCallback(() => {
@@ -90,6 +97,8 @@ export function useContainBox(ref: React.MutableRefObject<HTMLElement>, ratio: n
 			top: 0,
 			width: offsetWidth,
 			height: offsetHeight,
+			fullWidth: offsetWidth,
+			fullHeight: offsetHeight,
 		};
 
 		if (ratio.length === 2 && ratio.every(Boolean)) {
@@ -168,12 +177,17 @@ export function Canvas(props: CanvasProps) {
 	/>;
 };
 
+interface ResizedFrameFnProps extends FrameFnProps {
+	box: CanvasBoxInterface;
+}
+
 interface CanvasResizeProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
 	canvasProps?: React.DetailedHTMLProps<React.HTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>;
 	ratio: number[];
 	onInit?: (canvas: HTMLCanvasElement) => void;
-	onDraw?: (frame: FrameFnProps) => void;
+	onDraw?: (frame: ResizedFrameFnProps) => void;
 	onResize?: (box: CanvasBoxInterface) => void;
+	fillCanvas?: boolean;
 }
 
 /**
@@ -186,6 +200,7 @@ export default function CanvasResize(props: CanvasResizeProps) {
 		onInit,
 		onDraw,
 		onResize,
+		fillCanvas,
 		style = {},
 		...otherProps
 	} = props;
@@ -198,6 +213,18 @@ export default function CanvasResize(props: CanvasResizeProps) {
 		if (!onResize) return;
 		onResize(box);
 	}, [box, onResize]);
+
+	const handleDraw = useCallback((frame: FrameFnProps) => {
+		onDraw({
+			...frame,
+			box,
+		})
+	}, [box]);
+
+	const width = fillCanvas ? box.fullWidth : box.width;
+	const height = fillCanvas ? box.fullHeight : box.height;
+	const left = fillCanvas ? 0 : box.left;
+	const top = fillCanvas ? 0 : box.top;
 
 	return <div
 		{...otherProps}
@@ -213,13 +240,13 @@ export default function CanvasResize(props: CanvasResizeProps) {
 			style={{
 				...(canvasProps.style || {}),
 				margin: 0,
-				marginLeft: box.left,
-				marginTop: box.top,
+				marginLeft: left,
+				marginTop: top,
 			}}
-			width={box.width}
-			height={box.height}
+			width={width}
+			height={height}
 			onInit={onInit}
-			onDraw={onDraw}
+			onDraw={handleDraw}
 		/>
 	</div>;
 }
