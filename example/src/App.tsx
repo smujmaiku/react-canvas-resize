@@ -1,8 +1,8 @@
 import React from 'react';
-import Canvas from 'react-canvas-resize';
+import Canvas, { ResizedCanvasDrawInterface } from 'react-canvas-resize';
 import './App.css';
 
-function handleDraw({canvas, now, fps, interval, box}) {
+function handleDraw({ canvas, now, fps, interval, box }: ResizedCanvasDrawInterface): void {
 	const {
 		width,
 		height,
@@ -16,6 +16,7 @@ function handleDraw({canvas, now, fps, interval, box}) {
 	// if(interval < 1000 / 20) throw new Error();
 
 	const ctx = canvas.getContext('2d');
+	if (!ctx) throw new Error();
 	ctx.clearRect(0, 0, fullWidth, fullHeight);
 
 	ctx.save();
@@ -44,8 +45,8 @@ function handleDraw({canvas, now, fps, interval, box}) {
 
 	ctx.restore();
 
-	ctx.fillText(`fps: ${fps}`, 10,20)
-	ctx.fillText(`interval: ${interval}`, 10,35)
+	ctx.fillText(`fps: ${fps}`, 10, 20)
+	ctx.fillText(`interval: ${interval}`, 10, 35)
 }
 
 function App() {
@@ -53,7 +54,7 @@ function App() {
 		<div className="App">
 			<Canvas
 				className="canvas-wrap"
-				ratio={[16,9]}
+				ratio={[16, 9]}
 				onResize={console.log}
 				onDraw={handleDraw}
 				canvasProps={{

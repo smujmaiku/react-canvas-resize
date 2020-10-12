@@ -18,7 +18,7 @@ export function containBox(box: number[], container: number[]): number[] {
 	return box.map(v => v * scale);
 };
 
-interface FrameFnProps {
+export interface FrameFnInterface {
 	count: number;
 	now: number;
 	interval: number;
@@ -28,7 +28,7 @@ interface FrameFnProps {
 /**
  * Animation Frame Hook
  */
-export function useAnimationFrame(fn: (frame: FrameFnProps) => void): void {
+export function useAnimationFrame(fn: (frame: FrameFnInterface) => void): void {
 	useEffect(() => {
 		let timer: number;
 		let count = 0;
@@ -64,7 +64,7 @@ export function useAnimationFrame(fn: (frame: FrameFnProps) => void): void {
 	}, [fn]);
 }
 
-interface CanvasBoxInterface {
+export interface CanvasBoxInterface {
 	left: number;
 	top: number;
 	width: number;
@@ -126,11 +126,15 @@ export function useContainBox(ref: React.MutableRefObject<HTMLElement>, ratio: n
 	return box;
 }
 
-interface CanvasProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement> {
+interface CanvasDrawInterface extends FrameFnInterface {
+	canvas: HTMLCanvasElement;
+}
+
+export interface CanvasProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement> {
 	width: number;
 	height: number;
 	onInit?: (canvas: HTMLCanvasElement) => void;
-	onDraw?: (frame: FrameFnProps) => void;
+	onDraw?: (frame: FrameFnInterface) => void;
 }
 
 /**
@@ -177,15 +181,15 @@ export function Canvas(props: CanvasProps) {
 	/>;
 };
 
-interface ResizedFrameFnProps extends FrameFnProps {
+export interface ResizedCanvasDrawInterface extends CanvasDrawInterface {
 	box: CanvasBoxInterface;
 }
 
-interface CanvasResizeProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
+export interface CanvasResizeProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
 	canvasProps?: React.DetailedHTMLProps<React.HTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>;
 	ratio: number[];
 	onInit?: (canvas: HTMLCanvasElement) => void;
-	onDraw?: (frame: ResizedFrameFnProps) => void;
+	onDraw?: (frame: ResizedCanvasDrawInterface) => void;
 	onResize?: (box: CanvasBoxInterface) => void;
 	fillCanvas?: boolean;
 }
@@ -214,7 +218,7 @@ export default function CanvasResize(props: CanvasResizeProps) {
 		onResize(box);
 	}, [box, onResize]);
 
-	const handleDraw = useCallback((frame: FrameFnProps) => {
+	const handleDraw = useCallback((frame: CanvasDrawInterface) => {
 		onDraw({
 			...frame,
 			box,
