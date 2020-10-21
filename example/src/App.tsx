@@ -55,7 +55,7 @@ function App() {
 		<div className="App">
 			<Canvas
 				className="canvas-wrap"
-				ratio={[16, 9]}
+				ratio="16x9"
 				onResize={console.log}
 				onDraw={handleDraw}
 				canvasProps={{

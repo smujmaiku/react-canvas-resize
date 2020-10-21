@@ -64,6 +64,8 @@ export function useAnimationFrame(fn: (frame: FrameFnInterface) => void): void {
 	}, [fn]);
 }
 
+export type ResizeBoxRatio = number | string | number[];
+
 export interface CanvasBoxInterface {
 	left: number;
 	top: number;
@@ -77,7 +79,18 @@ export interface CanvasBoxInterface {
 /**
  * Contained box based on ref hook
  */
-export function useContainBox(ref: React.MutableRefObject<HTMLElement>, ratio: number[]) {
+export function useContainBox(ref: React.MutableRefObject<HTMLElement>, ratio: ResizeBoxRatio) {
+	let ratioX = 1;
+	let ratioY = 1;
+
+	if (typeof ratio === 'number') {
+		ratioX = ratio;
+	} else if (typeof ratio === 'string') {
+		[ratioX = 1, ratioY = 1] = ratio.split(/[x:\/]/).map((v: string) => parseInt(v));
+	} else if (ratio instanceof Array) {
+		[ratioX = 1, ratioY = 1] = ratio as number[];
+	}
+
 	const [box, setBox] = useState<CanvasBoxInterface>({
 		left: 0,
 		top: 0,
@@ -104,17 +117,15 @@ export function useContainBox(ref: React.MutableRefObject<HTMLElement>, ratio: n
 			scale: 1,
 		};
 
-		if (ratio.length === 2 && ratio.every(Boolean)) {
-			[newBox.width, newBox.height] = containBox(
-				ratio,
-				[offsetWidth, offsetHeight],
-			);
-			newBox.left = Math.floor((offsetWidth - newBox.width) / 2);
-			newBox.top = Math.floor((offsetHeight - newBox.height) / 2);
-			newBox.width = Math.floor(newBox.width);
-			newBox.height = Math.floor(newBox.height);
-			newBox.scale = newBox.width / ratio[0];
-		}
+		[newBox.width, newBox.height] = containBox(
+			[ratioX, ratioY],
+			[offsetWidth, offsetHeight],
+		);
+		newBox.left = Math.floor((offsetWidth - newBox.width) / 2);
+		newBox.top = Math.floor((offsetHeight - newBox.height) / 2);
+		newBox.width = Math.floor(newBox.width);
+		newBox.height = Math.floor(newBox.height);
+		newBox.scale = newBox.width / ratioX;
 
 		setBox((orig: CanvasBoxInterface) => {
 			if (newBox.width === orig.width && newBox.height === orig.height &&
@@ -123,7 +134,7 @@ export function useContainBox(ref: React.MutableRefObject<HTMLElement>, ratio: n
 			}
 			return newBox;
 		});
-	}, [ratio, ref]);
+	}, [ratioX, ratioY, ref]);
 
 	useAnimationFrame(checkResize);
 
@@ -191,7 +202,7 @@ export interface ResizedCanvasDrawInterface extends CanvasDrawInterface {
 
 export interface CanvasResizeProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
 	canvasProps?: React.DetailedHTMLProps<React.HTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>;
-	ratio: number[];
+	ratio: ResizeBoxRatio;
 	onInit?: (canvas: HTMLCanvasElement) => void;
 	onDraw?: (frame: ResizedCanvasDrawInterface) => void;
 	onResize?: (box: CanvasBoxInterface) => void;
