@@ -10,6 +10,7 @@ function handleDraw({ canvas, now, fps, interval, box }: ResizedCanvasDrawInterf
 		top,
 		fullWidth,
 		fullHeight,
+		scale,
 	} = box;
 
 	// Limit FPS
@@ -29,14 +30,13 @@ function handleDraw({ canvas, now, fps, interval, box }: ResizedCanvasDrawInterf
 
 	ctx.save();
 
-	const scale = Math.min(width, height)
-	const sx = Math.cos((now) / 300) * scale / 2.1;
-	const sy = Math.sin((now) / 120) * scale / 2.1;
-	const ex = Math.cos((now + 100) / 300) * scale / 2.1;
-	const ey = Math.sin((now + 100) / 120) * scale / 2.1;
+	const sx = Math.cos((now) / 300) * 4 * scale;
+	const sy = Math.sin((now) / 120) * 4 * scale;
+	const ex = Math.cos((now + 100) / 300) * 4 * scale;
+	const ey = Math.sin((now + 100) / 120) * 4 * scale;
 
 	ctx.translate(left + width / 2, top + height / 2);
-	ctx.lineWidth = scale / 20;
+	ctx.lineWidth = scale;
 	ctx.strokeStyle = '#F43';
 	ctx.beginPath();
 	ctx.moveTo(sx, sy);
@@ -47,6 +47,7 @@ function handleDraw({ canvas, now, fps, interval, box }: ResizedCanvasDrawInterf
 
 	ctx.fillText(`fps: ${fps}`, 10, 20)
 	ctx.fillText(`interval: ${interval}`, 10, 35)
+	ctx.fillText(`scale: ${scale.toFixed(2)}`, 10, 50)
 }
 
 function App() {

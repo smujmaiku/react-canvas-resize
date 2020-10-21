@@ -71,6 +71,7 @@ export interface CanvasBoxInterface {
 	height: number;
 	fullWidth: number;
 	fullHeight: number;
+	scale: number;
 };
 
 /**
@@ -84,6 +85,7 @@ export function useContainBox(ref: React.MutableRefObject<HTMLElement>, ratio: n
 		height: 1,
 		fullWidth: 1,
 		fullHeight: 1,
+		scale: 1,
 	});
 
 	const checkResize = useCallback(() => {
@@ -99,6 +101,7 @@ export function useContainBox(ref: React.MutableRefObject<HTMLElement>, ratio: n
 			height: offsetHeight,
 			fullWidth: offsetWidth,
 			fullHeight: offsetHeight,
+			scale: 1,
 		};
 
 		if (ratio.length === 2 && ratio.every(Boolean)) {
@@ -110,6 +113,7 @@ export function useContainBox(ref: React.MutableRefObject<HTMLElement>, ratio: n
 			newBox.top = Math.floor((offsetHeight - newBox.height) / 2);
 			newBox.width = Math.floor(newBox.width);
 			newBox.height = Math.floor(newBox.height);
+			newBox.scale = newBox.width / ratio[0];
 		}
 
 		setBox((orig: CanvasBoxInterface) => {

@@ -1,6 +1,6 @@
 {
   "name": "react-canvas-resize",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "A canvas wrapper that resizes",
   "main": "lib/CanvasResize.js",
   "types": "lib/CanvasResize.d.ts",
