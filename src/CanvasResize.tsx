@@ -202,7 +202,7 @@ export interface ResizedCanvasDrawInterface extends CanvasDrawInterface {
 
 export interface CanvasResizeProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
 	canvasProps?: React.DetailedHTMLProps<React.HTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>;
-	ratio: ResizeBoxRatio;
+	ratio?: ResizeBoxRatio;
 	onInit?: (canvas: HTMLCanvasElement) => void;
 	onDraw?: (frame: ResizedCanvasDrawInterface) => void;
 	onResize?: (box: CanvasBoxInterface) => void;
@@ -215,7 +215,7 @@ export interface CanvasResizeProps extends React.DetailedHTMLProps<React.HTMLAtt
 export default function CanvasResize(props: CanvasResizeProps) {
 	const {
 		canvasProps = {},
-		ratio,
+		ratio = 1,
 		onInit,
 		onDraw,
 		onResize,
