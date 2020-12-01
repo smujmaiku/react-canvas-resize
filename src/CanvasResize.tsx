@@ -141,7 +141,7 @@ export function useContainBox(ref: React.MutableRefObject<HTMLElement>, ratio: R
 	return box;
 }
 
-interface CanvasDrawInterface extends FrameFnInterface {
+export interface CanvasDrawInterface extends FrameFnInterface {
 	canvas: HTMLCanvasElement;
 }
 
@@ -149,7 +149,7 @@ export interface CanvasProps extends React.DetailedHTMLProps<React.HTMLAttribute
 	width: number;
 	height: number;
 	onInit?: (canvas: HTMLCanvasElement) => void;
-	onDraw?: (frame: FrameFnInterface) => void;
+	onDraw?: (frame: CanvasDrawInterface) => void;
 }
 
 /**
