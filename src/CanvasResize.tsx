@@ -4,7 +4,7 @@
  * MIT Licensed
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 
 /**
  * Reduces a box inside a container
@@ -18,6 +18,8 @@ export function containBox(box: number[], container: number[]): number[] {
 	return box.map(v => v * scale);
 }
 
+export type FrameFn = (frame: FrameFnInterface) => void;
+
 export interface FrameFnInterface {
 	count: number;
 	now: number;
@@ -25,10 +27,18 @@ export interface FrameFnInterface {
 	fps: number;
 }
 
+interface AnimationFrameIgnoreDeps {
+	fn?: FrameFn;
+}
+
 /**
  * Animation Frame Hook
  */
-export function useAnimationFrame(fn: (frame: FrameFnInterface) => void): void {
+export function useAnimationFrame(fn: FrameFn): void {
+	// Allow fn to change without resetting useEffect.
+	const ignoreDeps = useMemo<AnimationFrameIgnoreDeps>(() => ({}), []);
+	ignoreDeps.fn = fn;
+
 	useEffect(() => {
 		let timer: number;
 		let count = 0;
@@ -49,7 +59,7 @@ export function useAnimationFrame(fn: (frame: FrameFnInterface) => void): void {
 			timer = requestAnimationFrame(handleFrame);
 
 			try {
-				fn({ count, now, interval, fps });
+				ignoreDeps.fn({ count, now, interval, fps });
 				count++;
 			} catch (e) {
 				frameTimes.pop();
@@ -61,7 +71,7 @@ export function useAnimationFrame(fn: (frame: FrameFnInterface) => void): void {
 		return () => {
 			cancelAnimationFrame(timer);
 		};
-	}, [fn]);
+	}, [ignoreDeps]);
 }
 
 export type ResizeBoxRatio = number | string | number[];
