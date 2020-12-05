@@ -16,7 +16,7 @@ export function containBox(box: number[], container: number[]): number[] {
 	const scales = container.map((v, i) => v / box[i]);
 	const scale = scales.reduce((a, b) => Math.min(a, b));
 	return box.map(v => v * scale);
-};
+}
 
 export interface FrameFnInterface {
 	count: number;
@@ -74,12 +74,12 @@ export interface CanvasBoxInterface {
 	fullWidth: number;
 	fullHeight: number;
 	scale: number;
-};
+}
 
 /**
  * Contained box based on ref hook
  */
-export function useContainBox(ref: React.MutableRefObject<HTMLElement>, ratio: ResizeBoxRatio) {
+export function useContainBox(ref: React.MutableRefObject<HTMLElement>, ratio: ResizeBoxRatio): CanvasBoxInterface {
 	let ratioX = 1;
 	let ratioY = 1;
 
@@ -155,7 +155,7 @@ export interface CanvasProps extends React.DetailedHTMLProps<React.HTMLAttribute
 /**
  * Canvas React Element
  */
-export function Canvas(props: CanvasProps) {
+export function Canvas(props: CanvasProps): JSX.Element {
 	const {
 		width,
 		height,
@@ -194,7 +194,7 @@ export function Canvas(props: CanvasProps) {
 		width={width}
 		height={height}
 	/>;
-};
+}
 
 export interface ResizedCanvasDrawInterface extends CanvasDrawInterface {
 	box: CanvasBoxInterface;
@@ -212,7 +212,7 @@ export interface CanvasResizeProps extends React.DetailedHTMLProps<React.HTMLAtt
 /**
  * Resizing Canvas React Element
  */
-export default function CanvasResize(props: CanvasResizeProps) {
+export default function CanvasResize(props: CanvasResizeProps): JSX.Element {
 	const {
 		canvasProps = {},
 		ratio = 1,
@@ -238,7 +238,7 @@ export default function CanvasResize(props: CanvasResizeProps) {
 			...frame,
 			box,
 		})
-	}, [box]);
+	}, [box, onDraw]);
 
 	const width = fillCanvas ? box.fullWidth : box.width;
 	const height = fillCanvas ? box.fullHeight : box.height;
