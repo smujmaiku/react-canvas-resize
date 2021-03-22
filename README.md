@@ -30,4 +30,4 @@ const App = (props) => {
 
 ## License
 
-Copyright (c) 2020, Michael Szmadzinski. (MIT License)
+Copyright (c) 2021, Michael Szmadzinski. (MIT License)
