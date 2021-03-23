@@ -372,11 +372,9 @@ export function Crop(props: CropProps): JSX.Element {
 	useLayer(handleDraw, zIndex);
 
 	return (
-		<>
-			<CanvasProvider onChange={setLayers}>
-				{children}
-			</CanvasProvider>
-		</>
+		<CanvasProvider onChange={setLayers}>
+			{children}
+		</CanvasProvider>
 	);
 }
 
