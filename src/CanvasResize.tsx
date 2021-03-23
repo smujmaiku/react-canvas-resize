@@ -98,7 +98,7 @@ export interface CanvasBoxInterface {
 /**
  * Contained box based on ref hook
  */
-export function useContainBox(ref: React.MutableRefObject<HTMLElement>, ratio: ResizeBoxRatio): CanvasBoxInterface {
+export function useContainBox(ref: React.RefObject<HTMLElement>, ratio: ResizeBoxRatio): CanvasBoxInterface {
 	let ratioX = 1;
 	let ratioY = 1;
 
@@ -344,6 +344,7 @@ export function Crop(props: CropProps): JSX.Element {
 
 		const ctx = canvas.getContext('2d');
 		const btx = buffer.getContext('2d');
+		if (!ctx || !btx) return;
 
 		const orderedLayers = sortLayers(layers);
 
@@ -391,7 +392,7 @@ export interface LayerProps {
 	zIndex?: number;
 }
 
-export function Layer(props: LayerProps): JSX.Element {
+export function Layer(props: LayerProps): null {
 	const {
 		onDraw,
 		zIndex = 0,

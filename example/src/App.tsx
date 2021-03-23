@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-import { useEffect } from 'react';
-import { useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Canvas, { useLayer, Crop, Layer, CanvasDrawInterface } from 'react-canvas-resize';
 import './App.css';
 
