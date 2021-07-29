@@ -1,6 +1,6 @@
 {
   "name": "react-canvas-resize",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "A canvas wrapper that resizes",
   "main": "lib/CanvasResize.js",
   "types": "lib/CanvasResize.d.ts",
@@ -23,7 +23,7 @@
   "homepage": "https://github.com/smujmaiku/react-canvas-resize#readme",
   "dependencies": {
     "just-observable": "^0.3.0",
-    "make-list-provider": "^0.2.1"
+    "make-list-provider": "^0.2.2"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.12.16",
