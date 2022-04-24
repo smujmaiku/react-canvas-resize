@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { CanvasDrawInterface, CanvasLayer } from './CanvasBase';
+import { useLayer } from './CanvasBase';
+import { CanvasDrawInterface, CanvasLayer, CanvasProvider } from './context';
 import sortLayers from './sortLayer';
 
 export interface CropProps {

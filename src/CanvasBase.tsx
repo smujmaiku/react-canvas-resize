@@ -1,22 +1,14 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import makeListProvider from 'make-list-provider';
-import useAnimationFrame, { FrameFnInterface } from './animationFrame';
+import useAnimationFrame from './animationFrame';
+import {
+	useCanvasListing,
+	CanvasBoxInterface,
+	CanvasDrawInterface,
+	CanvasLayer,
+	CanvasProvider,
+	OnDraw,
+} from './context';
 import sortLayers from './sortLayer';
-
-export interface CanvasBoxInterface {
-	left: number;
-	top: number;
-	width: number;
-	height: number;
-	fullWidth: number;
-	fullHeight: number;
-	scale: number;
-}
-
-export interface CanvasDrawInterface extends FrameFnInterface {
-	box: CanvasBoxInterface;
-	canvas: HTMLCanvasElement;
-}
 
 export interface CanvasProps extends HTMLCanvasProps {
 	width: number;
@@ -25,10 +17,6 @@ export interface CanvasProps extends HTMLCanvasProps {
 	onInit?: (canvas: HTMLCanvasElement) => void;
 	onDraw?: (frame: CanvasDrawInterface) => void;
 }
-export type OnDraw = (frame: CanvasDrawInterface) => void;
-export type CanvasLayer = [draw: OnDraw, zIndex: number];
-
-const [CanvasProvider, useCanvasListing] = makeListProvider<CanvasLayer>();
 
 export function useLayer(onDraw: OnDraw, zIndex = 0 as number): void {
 	const listing = useMemo(
