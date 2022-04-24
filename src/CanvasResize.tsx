@@ -4,9 +4,24 @@
  * MIT Licensed
  */
 
-import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react';
+import React, {
+	useRef,
+	useState,
+	useEffect,
+	useMemo,
+	useCallback,
+} from 'react';
 import justObservable from 'just-observable';
 import makeListProvider from 'make-list-provider';
+
+type HTMLDivProps = React.DetailedHTMLProps<
+	React.HTMLAttributes<HTMLDivElement>,
+	HTMLDivElement
+>;
+type HTMLCanvasProps = React.DetailedHTMLProps<
+	React.HTMLAttributes<HTMLCanvasElement>,
+	HTMLCanvasElement
+>;
 
 const [CanvasProvider, useCanvasListing] = makeListProvider<CanvasLayer>();
 
@@ -19,7 +34,7 @@ export function containBox(box: number[], container: number[]): number[] {
 
 	const scales = container.map((v, i) => v / box[i]);
 	const scale = scales.reduce((a, b) => Math.min(a, b));
-	return box.map(v => v * scale);
+	return box.map((v) => v * scale);
 }
 
 export type OnDraw = (frame: CanvasDrawInterface) => void;
@@ -35,7 +50,7 @@ export interface FrameFnInterface {
 }
 
 function sortLayers(layers: CanvasLayer[]): CanvasLayer[] {
-	return [...layers].sort(([, a], [, b]) => a - b)
+	return [...layers].sort(([, a], [, b]) => a - b);
 }
 
 /**
@@ -46,7 +61,7 @@ export function useAnimationFrame(callback: FrameFn): void {
 	const frameObservable = useMemo(() => justObservable<FrameFnInterface>(), []);
 	useEffect(() => {
 		return frameObservable.subscribe(callback);
-	}, [frameObservable, callback])
+	}, [frameObservable, callback]);
 
 	useEffect(() => {
 		let timer: number;
@@ -62,14 +77,16 @@ export function useAnimationFrame(callback: FrameFn): void {
 				frameTimes.shift();
 			}
 			const minFrameTime = Math.min(frameTimes[0], now - 500);
-			const fps = Math.round((frameTimes.length - 1) / (now - minFrameTime) * 1000);
+			const fps = Math.round(
+				((frameTimes.length - 1) / (now - minFrameTime)) * 1000
+			);
 
 			cancelAnimationFrame(timer);
 			timer = requestAnimationFrame(handleFrame);
 
 			try {
 				frameObservable.next({ count, now, interval, fps });
-				count++;
+				count += 1;
 			} catch (e) {
 				frameTimes.pop();
 			}
@@ -98,14 +115,19 @@ export interface CanvasBoxInterface {
 /**
  * Contained box based on ref hook
  */
-export function useContainBox(ref: React.RefObject<HTMLElement>, ratio: ResizeBoxRatio): CanvasBoxInterface {
+export function useContainBox(
+	ref: React.RefObject<HTMLElement>,
+	ratio: ResizeBoxRatio
+): CanvasBoxInterface {
 	let ratioX = 1;
 	let ratioY = 1;
 
 	if (typeof ratio === 'number') {
 		ratioX = ratio;
 	} else if (typeof ratio === 'string') {
-		[ratioX = 1, ratioY = 1] = ratio.split(/[x:\/]/).map((v: string) => parseInt(v));
+		[ratioX = 1, ratioY = 1] = ratio
+			.split(/[x:/]/)
+			.map((v: string) => parseInt(v, 10));
 	} else if (ratio instanceof Array) {
 		[ratioX = 1, ratioY = 1] = ratio as number[];
 	}
@@ -138,7 +160,7 @@ export function useContainBox(ref: React.RefObject<HTMLElement>, ratio: ResizeBo
 
 		[newBox.width, newBox.height] = containBox(
 			[ratioX, ratioY],
-			[offsetWidth, offsetHeight],
+			[offsetWidth, offsetHeight]
 		);
 		newBox.left = Math.floor((offsetWidth - newBox.width) / 2);
 		newBox.top = Math.floor((offsetHeight - newBox.height) / 2);
@@ -147,8 +169,12 @@ export function useContainBox(ref: React.RefObject<HTMLElement>, ratio: ResizeBo
 		newBox.scale = newBox.width / ratioX;
 
 		setBox((orig: CanvasBoxInterface): CanvasBoxInterface => {
-			if (newBox.width === orig.width && newBox.height === orig.height &&
-				newBox.left === orig.left && newBox.top === orig.top) {
+			if (
+				newBox.width === orig.width &&
+				newBox.height === orig.height &&
+				newBox.left === orig.left &&
+				newBox.top === orig.top
+			) {
 				return orig;
 			}
 			return newBox;
@@ -160,12 +186,18 @@ export function useContainBox(ref: React.RefObject<HTMLElement>, ratio: ResizeBo
 	return box;
 }
 
+export function useLayer(onDraw: OnDraw, zIndex = 0 as number): void {
+	useCanvasListing(
+		useMemo((): CanvasLayer => [onDraw, zIndex], [onDraw, zIndex])
+	);
+}
+
 export interface CanvasDrawInterface extends FrameFnInterface {
 	box: CanvasBoxInterface;
 	canvas: HTMLCanvasElement;
 }
 
-export interface CanvasProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement> {
+export interface CanvasProps extends HTMLCanvasProps {
 	width: number;
 	height: number;
 	box?: CanvasBoxInterface;
@@ -177,78 +209,69 @@ export interface CanvasProps extends React.DetailedHTMLProps<React.HTMLAttribute
  * Canvas React Element
  */
 export function Canvas(props: CanvasProps): JSX.Element {
-	const {
-		width,
-		height,
-		box,
-		onInit,
-		onDraw,
-		children,
-		...otherProps
-	} = props;
+	const { width, height, box, onInit, onDraw, children, ...otherProps } = props;
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const [layers, setLayers] = useState<CanvasLayer[]>([]);
 
-	const drawCanvas = useCallback((opts): void => {
-		const { count } = opts;
+	const drawCanvas = useCallback(
+		(opts): void => {
+			const { count } = opts;
 
-		const canvas = canvasRef.current;
-		if (!canvas) {
-			throw new Error('Canvas is not ready');
-		}
+			const canvas = canvasRef.current;
+			if (!canvas) {
+				throw new Error('Canvas is not ready');
+			}
 
-		if (count === 0 && onInit) {
-			onInit(canvas);
-		}
+			if (count === 0 && onInit) {
+				onInit(canvas);
+			}
 
-		const orderedLayers = sortLayers([
-			...(onDraw ? [[onDraw, 0] as CanvasLayer] : []),
-			...layers,
-		]);
+			const orderedLayers = sortLayers([
+				...(onDraw ? [[onDraw, 0] as CanvasLayer] : []),
+				...layers,
+			]);
 
-		const frame: CanvasDrawInterface = {
-			box: {
-				left: 0,
-				top: 0,
-				width: canvas.width,
-				height: canvas.height,
-				scale: 1,
-				...(box || {}),
-				fullWidth: canvas.width,
-				fullHeight: canvas.height,
-			},
-			canvas,
-			...opts,
-		}
-		for (const [draw] of orderedLayers) {
-			draw(frame);
-		}
-	}, [box, canvasRef, onInit, onDraw, layers]);
+			const frame: CanvasDrawInterface = {
+				box: {
+					left: 0,
+					top: 0,
+					width: canvas.width,
+					height: canvas.height,
+					scale: 1,
+					...(box || {}),
+					fullWidth: canvas.width,
+					fullHeight: canvas.height,
+				},
+				canvas,
+				...opts,
+			};
+			for (const [draw] of orderedLayers) {
+				draw(frame);
+			}
+		},
+		[box, canvasRef, onInit, onDraw, layers]
+	);
 
 	useAnimationFrame(drawCanvas);
 
 	return (
 		<CanvasProvider onChange={setLayers}>
-			<canvas
-				{...otherProps}
-				ref={canvasRef}
-				width={width}
-				height={height}
-			>
+			<canvas {...otherProps} ref={canvasRef} width={width} height={height}>
 				{children}
 			</canvas>
 		</CanvasProvider>
 	);
 }
 
-export interface CanvasResizeProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
-	canvasProps?: React.DetailedHTMLProps<React.HTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>;
+export interface CanvasResizeProps extends HTMLDivProps {
+	canvasProps?: HTMLCanvasProps;
 	ratio?: ResizeBoxRatio;
 	onInit?: (canvas: HTMLCanvasElement) => void;
 	onDraw?: (frame: CanvasDrawInterface) => void;
 	onResize?: (box: CanvasBoxInterface) => void;
 	fillCanvas?: boolean;
+	style?: HTMLDivProps['style'];
 }
 
 /**
@@ -281,32 +304,34 @@ export default function CanvasResize(props: CanvasResizeProps): JSX.Element {
 	const left = fillCanvas ? 0 : box.left;
 	const top = fillCanvas ? 0 : box.top;
 
-	return <div
-		{...otherProps}
-		ref={rootRef}
-		style={{
-			...style,
-			padding: 0,
-			overflow: 'hidden',
-		}}
-	>
-		<Canvas
-			{...canvasProps}
+	return (
+		<div
+			{...otherProps}
+			ref={rootRef}
 			style={{
-				...(canvasProps.style || {}),
-				margin: 0,
-				marginLeft: left,
-				marginTop: top,
+				...style,
+				padding: 0,
+				overflow: 'hidden',
 			}}
-			width={width}
-			height={height}
-			box={box}
-			onInit={onInit}
-			onDraw={onDraw}
 		>
-			{children}
-		</Canvas>
-	</div>;
+			<Canvas
+				{...canvasProps}
+				style={{
+					...(canvasProps.style || {}),
+					margin: 0,
+					marginLeft: left,
+					marginTop: top,
+				}}
+				width={width}
+				height={height}
+				box={box}
+				onInit={onInit}
+				onDraw={onDraw}
+			>
+				{children}
+			</Canvas>
+		</div>
+	);
 }
 
 export interface CropProps {
@@ -319,70 +344,55 @@ export interface CropProps {
 }
 
 export function Crop(props: CropProps): JSX.Element {
-	const {
-		left,
-		top,
-		width,
-		height,
-		zIndex = 0,
-		children,
-	} = props;
+	const { left, top, width, height, zIndex = 0, children } = props;
 
-	const buffer = useMemo((): HTMLCanvasElement => document.createElement('canvas'), []);
+	const buffer = useMemo(
+		(): HTMLCanvasElement => document.createElement('canvas'),
+		[]
+	);
 	const [layers, setLayers] = useState<CanvasLayer[]>([]);
 
 	useEffect(() => {
 		buffer.width = width - left;
 		buffer.height = height - top;
-	}, [buffer, left, top, width, height])
+	}, [buffer, left, top, width, height]);
 
-	const handleDraw = useCallback((frame: CanvasDrawInterface): void => {
-		const {
-			box,
-			canvas,
-		} = frame;
+	const handleDraw = useCallback(
+		(frame: CanvasDrawInterface): void => {
+			const { box, canvas } = frame;
 
-		const ctx = canvas.getContext('2d');
-		const btx = buffer.getContext('2d');
-		if (!ctx || !btx) return;
+			const ctx = canvas.getContext('2d');
+			const btx = buffer.getContext('2d');
+			if (!ctx || !btx) return;
 
-		const orderedLayers = sortLayers(layers);
+			const orderedLayers = sortLayers(layers);
 
-		const bufferFrame = {
-			...frame,
-			box: {
-				...box,
-				left: box.left + left,
-				top: box.top + top,
-				width,
-				height,
-			},
-			canvas: buffer,
-		};
+			const bufferFrame = {
+				...frame,
+				box: {
+					...box,
+					left: box.left + left,
+					top: box.top + top,
+					width,
+					height,
+				},
+				canvas: buffer,
+			};
 
-		btx.drawImage(buffer, -left, -top);
+			btx.drawImage(buffer, -left, -top);
 
-		for (const [draw] of orderedLayers) {
-			draw(bufferFrame);
-		}
+			for (const [draw] of orderedLayers) {
+				draw(bufferFrame);
+			}
 
-		ctx.drawImage(buffer, left, top);
-	}, [buffer, left, top, width, height, layers]);
+			ctx.drawImage(buffer, left, top);
+		},
+		[buffer, left, top, width, height, layers]
+	);
 
 	useLayer(handleDraw, zIndex);
 
-	return (
-		<CanvasProvider onChange={setLayers}>
-			{children}
-		</CanvasProvider>
-	);
-}
-
-export function useLayer(onDraw: OnDraw, zIndex = 0 as number): void {
-	useCanvasListing(useMemo((): CanvasLayer => ([
-		onDraw,
-		zIndex,
-	]), [onDraw, zIndex]));
+	return <CanvasProvider onChange={setLayers}>{children}</CanvasProvider>;
 }
 
 export interface LayerProps {
@@ -391,10 +401,7 @@ export interface LayerProps {
 }
 
 export function Layer(props: LayerProps): null {
-	const {
-		onDraw,
-		zIndex = 0,
-	} = props;
+	const { onDraw, zIndex = 0 } = props;
 
 	useLayer(onDraw, zIndex);
 
