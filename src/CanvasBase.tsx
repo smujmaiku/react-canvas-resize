@@ -10,9 +10,15 @@ import {
 } from './context';
 import sortLayers from './sortLayer';
 
+export type HTMLCanvasProps = React.DetailedHTMLProps<
+	React.HTMLAttributes<HTMLCanvasElement>,
+	HTMLCanvasElement
+>;
+
 export interface CanvasProps extends HTMLCanvasProps {
 	width: number;
 	height: number;
+	play?: boolean;
 	box?: CanvasBoxInterface;
 	onInit?: (canvas: HTMLCanvasElement) => void;
 	onDraw?: (frame: CanvasDrawInterface) => void;
@@ -30,10 +36,12 @@ export function useLayer(onDraw: OnDraw, zIndex = 0 as number): void {
  * Canvas React Element
  */
 export default function CanvasBase(props: CanvasProps): JSX.Element {
-	const { width, height, box, onInit, onDraw, children, ...otherProps } = props;
+	const { width, height, play, box, onInit, onDraw, children, ...otherProps } =
+		props;
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const [layers, setLayers] = useState<CanvasLayer[]>([]);
+	const [needFrame, setNeedFrame] = useState<boolean>(true);
 
 	const drawCanvas = useCallback(
 		(opts): void => {
@@ -43,6 +51,8 @@ export default function CanvasBase(props: CanvasProps): JSX.Element {
 			if (!canvas) {
 				throw new Error('Canvas is not ready');
 			}
+
+			setNeedFrame(false);
 
 			if (count === 0 && onInit) {
 				onInit(canvas);
@@ -74,7 +84,8 @@ export default function CanvasBase(props: CanvasProps): JSX.Element {
 		[box, canvasRef, onInit, onDraw, layers]
 	);
 
-	useAnimationFrame(drawCanvas);
+	const animate = play || needFrame;
+	useAnimationFrame(drawCanvas, animate);
 
 	return (
 		<CanvasProvider onChange={setLayers}>
