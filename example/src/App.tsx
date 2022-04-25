@@ -24,7 +24,7 @@ function Fill({ color }: { color: string }): null {
 }
 
 function Stats(): JSX.Element {
-	const handleDraw = useCallback(({ canvas, fps, interval, box }: CanvasDrawInterface): void => {
+	const handleDraw = useCallback(({ canvas, fps, interval, count, box }: CanvasDrawInterface): void => {
 		const ctx = canvas.getContext('2d');
 		if (!ctx) throw new Error();
 
@@ -34,7 +34,8 @@ function Stats(): JSX.Element {
 
 		ctx.fillText(`fps: ${fps}`, 5, 15);
 		ctx.fillText(`interval: ${interval}`, 5, 30);
-		ctx.fillText(`scale: ${scale.toFixed(2)}`, 5, 45);
+		ctx.fillText(`count: ${count}`, 5, 45);
+		ctx.fillText(`scale: ${scale.toFixed(2)}`, 5, 60);
 	}, []);
 
 	return <Layer onDraw={handleDraw} />;
@@ -42,6 +43,8 @@ function Stats(): JSX.Element {
 
 function App(): JSX.Element {
 	const [color, setColor] = useState<string>('#F43');
+
+	const [play, setPlay] = useState(true);
 
 	useEffect(() => {
 		let index = 0;
@@ -99,9 +102,15 @@ function App(): JSX.Element {
 		ctx.restore();
 	}, [color]);
 
+	const togglePlay = useCallback(() => {
+		setPlay(v => !v);
+	}, []);
+
 	return (
 		<div className="App">
 			<Canvas
+				play={play}
+				onClick={togglePlay}
 				className="canvas-wrap"
 				ratio="16x9"
 				onResize={console.log}
@@ -115,7 +124,7 @@ function App(): JSX.Element {
 					left={10}
 					top={10}
 					width={120}
-					height={60}
+					height={75}
 					zIndex={99}
 				>
 					<Fill color="#CCC" />
