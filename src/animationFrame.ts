@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type FrameFn = (frame: FrameFnInterface) => void;
 
-function noop(): void {
+const noop = () => {
 	// noop
-}
+};
 
 export type RenderFrame = () => void;
 
@@ -37,6 +37,10 @@ export default function useAnimationFrame(
 	const callbackRef = useRef<FrameFn>(callback);
 	callbackRef.current = callback;
 
+	const playRef = useRef<boolean>(false);
+	playRef.current = Boolean(play);
+
+	const timerRef = useRef<number>(-1);
 	const countRef = useRef<number>(0);
 	const framesRef = useRef<number[]>([]);
 
@@ -45,45 +49,39 @@ export default function useAnimationFrame(
 		framesRef.current = [];
 	}, [countRef, framesRef]);
 
-	const [renderFrame, setRenderFrame] = useState<() => void>(noop);
+	const renderFrame = useCallback(() => {
+		const now = Date.now();
 
-	useEffect(() => {
-		let timer: number;
-
-		const handleFrame = () => {
-			const now = Date.now();
-
-			cancelAnimationFrame(timer);
-			if (play) {
-				timer = requestAnimationFrame(handleFrame);
-			}
-
-			const interval = now - framesRef.current[framesRef.current.length - 1];
-			framesRef.current.push(now);
-
-			const fps = processFrames(framesRef.current, now);
-			const count = countRef.current;
-			countRef.current += 1;
-
-			try {
-				callbackRef.current({ count, now, interval, fps });
-			} catch (e) {
-				// Remove failed frame stats
-				countRef.current -= 1;
-				framesRef.current.pop();
-			}
-		};
-
-		setRenderFrame(handleFrame);
-
-		if (play) {
-			handleFrame();
+		cancelAnimationFrame(timerRef.current);
+		if (playRef.current) {
+			timerRef.current = requestAnimationFrame(renderFrame);
 		}
 
+		const interval = now - framesRef.current[framesRef.current.length - 1];
+		framesRef.current.push(now);
+
+		const fps = processFrames(framesRef.current, now);
+		const count = countRef.current;
+		countRef.current += 1;
+
+		try {
+			callbackRef.current({ count, now, interval, fps });
+		} catch (e) {
+			// Remove failed frame stats
+			countRef.current -= 1;
+			framesRef.current.pop();
+		}
+	}, []);
+
+	// Handle play change
+	useEffect(() => {
+		if (!play) return noop;
+
+		renderFrame();
 		return () => {
-			cancelAnimationFrame(timer);
+			cancelAnimationFrame(timerRef.current);
 		};
-	}, [callbackRef, countRef, framesRef, play]);
+	}, [renderFrame, play]);
 
 	return renderFrame;
 }

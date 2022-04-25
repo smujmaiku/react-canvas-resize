@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from 'react';
 import useAnimationFrame from './animationFrame';
 import {
 	useCanvasListing,
@@ -9,6 +15,10 @@ import {
 	OnDraw,
 } from './context';
 import sortLayers from './sortLayer';
+
+const noop = () => {
+	// noop;
+};
 
 export type HTMLCanvasProps = React.DetailedHTMLProps<
 	React.HTMLAttributes<HTMLCanvasElement>,
@@ -39,9 +49,11 @@ export default function CanvasBase(props: CanvasProps): JSX.Element {
 	const { width, height, play, box, onInit, onDraw, children, ...otherProps } =
 		props;
 
-	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const [canvasEl, setCanvas] = useState<HTMLCanvasElement | null>(null);
+	const canvasRef = useRef<HTMLCanvasElement | null>(null);
+	canvasRef.current = canvasEl;
+
 	const [layers, setLayers] = useState<CanvasLayer[]>([]);
-	const [needFrame, setNeedFrame] = useState<boolean>(true);
 
 	const drawCanvas = useCallback(
 		(opts): void => {
@@ -51,8 +63,6 @@ export default function CanvasBase(props: CanvasProps): JSX.Element {
 			if (!canvas) {
 				throw new Error('Canvas is not ready');
 			}
-
-			setNeedFrame(false);
 
 			if (count === 0 && onInit) {
 				onInit(canvas);
@@ -84,12 +94,30 @@ export default function CanvasBase(props: CanvasProps): JSX.Element {
 		[box, canvasRef, onInit, onDraw, layers]
 	);
 
-	const animate = play || needFrame;
-	useAnimationFrame(drawCanvas, animate);
+	const renderFrame = useAnimationFrame(drawCanvas, play);
+
+	// Render new canvas
+	useEffect(() => {
+		renderFrame();
+	}, [renderFrame, canvasEl]);
+
+	// Render on resize
+	useEffect(() => {
+		if (!canvasEl) return noop;
+
+		const resizeObserver = new ResizeObserver(() => {
+			renderFrame();
+		});
+		resizeObserver.observe(canvasEl);
+
+		return () => {
+			resizeObserver.disconnect();
+		};
+	}, [canvasEl, renderFrame]);
 
 	return (
 		<CanvasProvider onChange={setLayers}>
-			<canvas {...otherProps} ref={canvasRef} width={width} height={height}>
+			<canvas {...otherProps} ref={setCanvas} width={width} height={height}>
 				{children}
 			</canvas>
 		</CanvasProvider>
