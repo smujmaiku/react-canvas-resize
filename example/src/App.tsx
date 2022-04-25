@@ -44,8 +44,6 @@ function Stats(): JSX.Element {
 function App(): JSX.Element {
 	const [color, setColor] = useState<string>('#F43');
 
-	const [play, setPlay] = useState(true);
-
 	useEffect(() => {
 		let index = 0;
 		const timer = setInterval(() => {
@@ -102,6 +100,7 @@ function App(): JSX.Element {
 		ctx.restore();
 	}, [color]);
 
+	const [play, setPlay] = useState(true);
 	const togglePlay = useCallback(() => {
 		setPlay(v => !v);
 	}, []);
