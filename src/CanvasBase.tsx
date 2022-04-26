@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from 'react';
 import useAnimationFrame from './animationFrame';
 import {
 	CanvasBoxInterface,
@@ -19,11 +25,14 @@ export type HTMLCanvasProps = React.DetailedHTMLProps<
 	HTMLCanvasElement
 >;
 
+export type ResizePlanT = 'clear' | 'static' | 'stretch' | 'redrawsync';
+
 export interface CanvasProps extends HTMLCanvasProps {
 	width: number;
 	height: number;
 	play?: boolean;
 	box?: CanvasBoxInterface;
+	resizePlan?: ResizePlanT;
 	onInit?: (canvas: HTMLCanvasElement) => void;
 	onDraw?: (frame: CanvasDrawInterface) => void;
 }
@@ -32,12 +41,26 @@ export interface CanvasProps extends HTMLCanvasProps {
  * Canvas React Element
  */
 export default function CanvasBase(props: CanvasProps): JSX.Element {
-	const { width, height, play, box, onInit, onDraw, children, ...otherProps } =
-		props;
+	const {
+		width,
+		height,
+		play,
+		box,
+		resizePlan = 'stretch',
+		onInit,
+		onDraw,
+		children,
+		...otherProps
+	} = props;
 
 	const [canvasEl, setCanvas] = useState<HTMLCanvasElement | null>(null);
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	canvasRef.current = canvasEl;
+
+	const buffer = useMemo(
+		(): HTMLCanvasElement => document.createElement('canvas'),
+		[]
+	);
 
 	const [layers, setLayers] = useState<CanvasLayer[]>([]);
 
@@ -73,8 +96,16 @@ export default function CanvasBase(props: CanvasProps): JSX.Element {
 			for (const [draw] of orderedLayers) {
 				draw(frame);
 			}
+
+			buffer.width = canvas.width;
+			buffer.height = canvas.height;
+			const btx = buffer.getContext('2d');
+			if (btx) {
+				btx.clearRect(0, 0, buffer.width, buffer.height);
+				btx.drawImage(canvas, 0, 0);
+			}
 		},
-		[box, canvasRef, onInit, layers]
+		[box, canvasRef, onInit, layers, buffer]
 	);
 
 	const renderFrame = useAnimationFrame(drawCanvas, play);
@@ -84,19 +115,42 @@ export default function CanvasBase(props: CanvasProps): JSX.Element {
 		renderFrame(true);
 	}, [renderFrame, canvasEl]);
 
+	const redrawBuffer = useCallback(() => {
+		if (!canvasEl) return;
+
+		const ctx = canvasEl.getContext('2d');
+		if (!ctx) return;
+
+		switch (resizePlan) {
+			case 'clear':
+				break;
+			case 'static':
+				ctx.drawImage(buffer, 0, 0);
+				break;
+			case 'stretch':
+				ctx.drawImage(buffer, 0, 0, canvasEl.width, canvasEl.height);
+				break;
+			case 'redrawsync':
+				renderFrame(true);
+				break;
+			default:
+		}
+	}, [canvasEl, buffer, resizePlan, renderFrame]);
+
 	// Render on resize
 	useEffect(() => {
 		if (!canvasEl) return noop;
 
 		const resizeObserver = new ResizeObserver(() => {
-			renderFrame();
+			renderFrame(false);
+			redrawBuffer();
 		});
 		resizeObserver.observe(canvasEl);
 
 		return () => {
 			resizeObserver.disconnect();
 		};
-	}, [canvasEl, renderFrame]);
+	}, [canvasEl, redrawBuffer, renderFrame]);
 
 	return (
 		<CanvasProvider onChange={setLayers}>

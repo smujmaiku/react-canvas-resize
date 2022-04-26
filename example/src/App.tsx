@@ -112,6 +112,7 @@ function App(): JSX.Element {
 				onClick={togglePlay}
 				className="canvas-wrap"
 				ratio="16x9"
+				resizePlan="static"
 				onResize={console.log}
 				onDraw={handleDraw}
 				canvasProps={{

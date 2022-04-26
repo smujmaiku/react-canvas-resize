@@ -5,7 +5,7 @@
  */
 
 import React, { useRef, useEffect } from 'react';
-import CanvasBase, { HTMLCanvasProps } from './CanvasBase';
+import CanvasBase, { HTMLCanvasProps, ResizePlanT } from './CanvasBase';
 import useContainBox, { ResizeBoxRatio } from './containBox';
 import { CanvasBoxInterface, CanvasDrawInterface } from './context';
 
@@ -18,6 +18,7 @@ export interface CanvasResizeProps extends HTMLDivProps {
 	canvasProps?: HTMLCanvasProps;
 	play?: boolean;
 	ratio?: ResizeBoxRatio;
+	resizePlan?: ResizePlanT;
 	onInit?: (canvas: HTMLCanvasElement) => void;
 	onDraw?: (frame: CanvasDrawInterface) => void;
 	onResize?: (box: CanvasBoxInterface) => void;
@@ -33,6 +34,7 @@ export default function CanvasResize(props: CanvasResizeProps): JSX.Element {
 		canvasProps = {},
 		play,
 		ratio = 1,
+		resizePlan,
 		onInit,
 		onDraw,
 		onResize,
@@ -78,6 +80,7 @@ export default function CanvasResize(props: CanvasResizeProps): JSX.Element {
 				width={width}
 				height={height}
 				box={box}
+				resizePlan={resizePlan}
 				onInit={onInit}
 				onDraw={onDraw}
 			>
