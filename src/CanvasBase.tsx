@@ -1,19 +1,13 @@
-import React, {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAnimationFrame from './animationFrame';
 import {
-	useCanvasListing,
 	CanvasBoxInterface,
 	CanvasDrawInterface,
 	CanvasLayer,
 	CanvasProvider,
-	OnDraw,
 } from './context';
+import Layer from './Layer';
+
 import sortLayers from './sortLayer';
 
 const noop = () => {
@@ -32,14 +26,6 @@ export interface CanvasProps extends HTMLCanvasProps {
 	box?: CanvasBoxInterface;
 	onInit?: (canvas: HTMLCanvasElement) => void;
 	onDraw?: (frame: CanvasDrawInterface) => void;
-}
-
-export function useLayer(onDraw: OnDraw, zIndex = 0 as number): void {
-	const listing = useMemo(
-		(): CanvasLayer => [onDraw, zIndex],
-		[onDraw, zIndex]
-	);
-	useCanvasListing(listing);
 }
 
 /**
@@ -68,10 +54,7 @@ export default function CanvasBase(props: CanvasProps): JSX.Element {
 				onInit(canvas);
 			}
 
-			const orderedLayers = sortLayers([
-				...(onDraw ? [[onDraw, 0] as CanvasLayer] : []),
-				...layers,
-			]);
+			const orderedLayers = sortLayers(layers);
 
 			const frame: CanvasDrawInterface = {
 				box: {
@@ -91,7 +74,7 @@ export default function CanvasBase(props: CanvasProps): JSX.Element {
 				draw(frame);
 			}
 		},
-		[box, canvasRef, onInit, onDraw, layers]
+		[box, canvasRef, onInit, layers]
 	);
 
 	const renderFrame = useAnimationFrame(drawCanvas, play);
@@ -118,6 +101,7 @@ export default function CanvasBase(props: CanvasProps): JSX.Element {
 	return (
 		<CanvasProvider onChange={setLayers}>
 			<canvas {...otherProps} ref={setCanvas} width={width} height={height}>
+				{onDraw && <Layer onDraw={onDraw} />}
 				{children}
 			</canvas>
 		</CanvasProvider>

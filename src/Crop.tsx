@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLayer } from './CanvasBase';
+import { useLayer } from './Layer';
 import { CanvasDrawInterface, CanvasLayer, CanvasProvider } from './context';
 import sortLayers from './sortLayer';
 

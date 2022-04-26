@@ -1,5 +1,13 @@
-import { useLayer } from './CanvasBase';
-import { OnDraw } from './context';
+import { useMemo } from 'react';
+import { CanvasLayer, OnDraw, useCanvasListing } from './context';
+
+export function useLayer(onDraw: OnDraw, zIndex = 0 as number): void {
+	const listing = useMemo(
+		(): CanvasLayer => [onDraw, zIndex],
+		[onDraw, zIndex]
+	);
+	useCanvasListing(listing);
+}
 
 export interface LayerProps {
 	onDraw: OnDraw;
