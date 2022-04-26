@@ -1,6 +1,6 @@
 /*!
  * React Canvas Resize <https://github.com/smujmaiku/react-canvas-resize>
- * Copyright(c) 2021 Michael Szmadzinski
+ * Copyright(c) 2022 Michael Szmadzinski
  * MIT Licensed
  */
 
