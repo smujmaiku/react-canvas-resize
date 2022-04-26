@@ -1,12 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-export type FrameFn = (frame: FrameFnInterface) => void;
-
 const noop = () => {
 	// noop
 };
-
-export type RenderFrame = () => void;
 
 export interface FrameFnInterface {
 	count: number;
@@ -14,6 +10,8 @@ export interface FrameFnInterface {
 	interval: number;
 	fps: number;
 }
+
+export type FrameFn = (frame: FrameFnInterface) => void;
 
 function processFrames(frames: number[], now: number): number {
 	// Purge old frames
@@ -26,6 +24,8 @@ function processFrames(frames: number[], now: number): number {
 
 	return fps;
 }
+
+export type RenderFrame = (sync?: boolean) => void;
 
 /**
  * Animation Frame Hook
@@ -49,12 +49,12 @@ export default function useAnimationFrame(
 		framesRef.current = [];
 	}, [countRef, framesRef]);
 
-	const renderFrame = useCallback(() => {
+	const handleRender = useCallback(() => {
 		const now = Date.now();
 
 		cancelAnimationFrame(timerRef.current);
 		if (playRef.current) {
-			timerRef.current = requestAnimationFrame(renderFrame);
+			timerRef.current = requestAnimationFrame(handleRender);
 		}
 
 		const interval = now - framesRef.current[framesRef.current.length - 1];
@@ -73,11 +73,24 @@ export default function useAnimationFrame(
 		}
 	}, []);
 
+	const renderFrame = useCallback(
+		(sync = false) => {
+			cancelAnimationFrame(timerRef.current);
+			if (sync) {
+				handleRender();
+			} else {
+				timerRef.current = requestAnimationFrame(handleRender);
+			}
+		},
+		[handleRender]
+	);
+
 	// Handle play change
 	useEffect(() => {
 		if (!play) return noop;
 
-		renderFrame();
+		renderFrame(true);
+
 		return () => {
 			cancelAnimationFrame(timerRef.current);
 		};

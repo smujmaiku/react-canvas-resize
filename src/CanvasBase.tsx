@@ -81,7 +81,7 @@ export default function CanvasBase(props: CanvasProps): JSX.Element {
 
 	// Render new canvas
 	useEffect(() => {
-		renderFrame();
+		renderFrame(true);
 	}, [renderFrame, canvasEl]);
 
 	// Render on resize
