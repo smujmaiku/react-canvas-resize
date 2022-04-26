@@ -5,25 +5,30 @@
  */
 
 import React, { useRef, useEffect } from 'react';
-import CanvasBase, { HTMLCanvasProps, ResizePlanT } from './CanvasBase';
+import CanvasBase, {
+	CanvasBaseTypeProps,
+	HTMLCanvasProps,
+	ResizePlanT,
+} from './CanvasBase';
 import useContainBox, { ResizeBoxRatio } from './containBox';
-import { CanvasBoxInterface, CanvasDrawInterface } from './context';
+import { CanvasBoxInterface } from './context';
 
 export type HTMLDivProps = React.DetailedHTMLProps<
 	React.HTMLAttributes<HTMLDivElement>,
 	HTMLDivElement
 >;
 
-export interface CanvasResizeProps extends HTMLDivProps {
+export type CanvasResizeTypeProps = Omit<
+	CanvasBaseTypeProps,
+	'width' | 'height' | 'box'
+>;
+
+export interface CanvasResizeProps extends CanvasResizeTypeProps, HTMLDivProps {
 	canvasProps?: HTMLCanvasProps;
-	play?: boolean;
 	ratio?: ResizeBoxRatio;
 	resizePlan?: ResizePlanT;
-	onInit?: (canvas: HTMLCanvasElement) => void;
-	onDraw?: (frame: CanvasDrawInterface) => void;
 	onResize?: (box: CanvasBoxInterface) => void;
 	fillCanvas?: boolean;
-	style?: HTMLDivProps['style'];
 }
 
 /**
@@ -39,9 +44,8 @@ export default function CanvasResize(props: CanvasResizeProps): JSX.Element {
 		onDraw,
 		onResize,
 		fillCanvas,
-		style = {},
 		children,
-		...otherProps
+		...divProps
 	} = props;
 
 	const rootRef = useRef<HTMLDivElement>(null);
@@ -60,10 +64,10 @@ export default function CanvasResize(props: CanvasResizeProps): JSX.Element {
 
 	return (
 		<div
-			{...otherProps}
+			{...divProps}
 			ref={rootRef}
 			style={{
-				...style,
+				...divProps.style,
 				padding: 0,
 				overflow: 'hidden',
 			}}
@@ -71,15 +75,15 @@ export default function CanvasResize(props: CanvasResizeProps): JSX.Element {
 			<CanvasBase
 				{...canvasProps}
 				style={{
-					...(canvasProps.style || {}),
+					...canvasProps.style,
 					margin: 0,
 					marginLeft: left,
 					marginTop: top,
 				}}
-				play={play}
 				width={width}
 				height={height}
 				box={box}
+				play={play}
 				resizePlan={resizePlan}
 				onInit={onInit}
 				onDraw={onDraw}

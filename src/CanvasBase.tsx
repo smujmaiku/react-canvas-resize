@@ -27,7 +27,7 @@ export type HTMLCanvasProps = React.DetailedHTMLProps<
 
 export type ResizePlanT = 'clear' | 'static' | 'stretch' | 'redrawsync';
 
-export interface CanvasProps extends HTMLCanvasProps {
+export interface CanvasBaseTypeProps {
 	width: number;
 	height: number;
 	play?: boolean;
@@ -37,10 +37,14 @@ export interface CanvasProps extends HTMLCanvasProps {
 	onDraw?: (frame: CanvasDrawInterface) => void;
 }
 
+export interface CanvasBaseProps extends HTMLCanvasProps, CanvasBaseTypeProps {
+	// Just extend
+}
+
 /**
  * Canvas React Element
  */
-export default function CanvasBase(props: CanvasProps): JSX.Element {
+export default function CanvasBase(props: CanvasBaseProps): JSX.Element {
 	const {
 		width,
 		height,
