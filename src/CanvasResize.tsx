@@ -11,7 +11,7 @@ import CanvasBase, {
 	ResizePlanT,
 } from './CanvasBase';
 import useContainBox, { ResizeBoxRatio } from './containBox';
-import { CanvasBoxInterface } from './context';
+import { CanvasBoxInterface } from './RenderProvider';
 
 export type HTMLDivProps = React.DetailedHTMLProps<
 	React.HTMLAttributes<HTMLDivElement>,
@@ -95,8 +95,8 @@ export default function CanvasResize(props: CanvasResizeProps): JSX.Element {
 }
 
 export { default as CanvasBase } from './CanvasBase';
-export { default as Layer, useLayer } from './Layer';
+export { default as Layer } from './Layer';
 export { default as Crop } from './Crop';
 export { default as useAnimationFrame } from './animationFrame';
 export { default as useContainBox, containBox } from './containBox';
-export { CanvasDrawInterface } from './context';
+export { useLayer, CanvasDrawInterface } from './RenderProvider';
