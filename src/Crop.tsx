@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLayer } from './Layer';
-import { CanvasDrawInterface, CanvasLayer, CanvasProvider } from './context';
-import sortLayers from './sortLayer';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import Frame from './Frame';
+import { CanvasDrawInterface } from './RenderProvider';
 
 export interface CropProps {
 	left: number;
@@ -19,47 +18,37 @@ export default function Crop(props: CropProps): JSX.Element {
 		(): HTMLCanvasElement => document.createElement('canvas'),
 		[]
 	);
-	const [layers, setLayers] = useState<CanvasLayer[]>([]);
 
 	useEffect(() => {
 		buffer.width = width - left;
 		buffer.height = height - top;
 	}, [buffer, left, top, width, height]);
 
+	const box: CanvasBoxInterface = useMemo(
+		() => ({
+			left,
+			top,
+			width,
+			height,
+		}),
+		[]
+	);
+
 	const handleDraw = useCallback(
 		(frame: CanvasDrawInterface): void => {
-			const { box, canvas } = frame;
+			const { canvas } = frame;
 
 			const ctx = canvas.getContext('2d');
-			const btx = buffer.getContext('2d');
-			if (!ctx || !btx) return;
-
-			const orderedLayers = sortLayers(layers);
-
-			const bufferFrame = {
-				...frame,
-				box: {
-					...box,
-					left: box.left + left,
-					top: box.top + top,
-					width,
-					height,
-				},
-				canvas: buffer,
-			};
-
-			btx.drawImage(buffer, -left, -top);
-
-			for (const [draw] of orderedLayers) {
-				draw(bufferFrame);
-			}
+			if (!ctx) return;
 
 			ctx.drawImage(buffer, left, top);
 		},
-		[buffer, left, top, width, height, layers]
+		[buffer, left, top]
 	);
 
-	useLayer(handleDraw, zIndex);
-
-	return <CanvasProvider onChange={setLayers}>{children}</CanvasProvider>;
+	return (
+		<Frame canvas={buffer} onDraw={handleDraw} zIndex={zIndex} box={box}>
+			{children}
+		</Frame>
+	);
 }
