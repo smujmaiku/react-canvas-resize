@@ -1,5 +1,7 @@
 import makeListProvider from 'make-list-provider';
 import React, {
+	createContext,
+	useContext,
 	useCallback,
 	useImperativeHandle,
 	useMemo,
@@ -27,6 +29,14 @@ export interface CanvasDrawInterface extends FrameFnInterface {
 export type OnDraw = (frame: CanvasDrawInterface) => void;
 export type CanvasLayer = [draw: OnDraw, zIndex: number];
 
+const boxContext = createContext<Partial<CanvasBoxInterface> | undefined>(
+	undefined
+);
+
+export function useBox(): Partial<CanvasBoxInterface> | undefined {
+	return useContext(boxContext);
+}
+
 const [LayerProvider, useLayerListing] = makeListProvider<CanvasLayer>();
 
 export function useLayer(onDraw: OnDraw, zIndex = 0 as number): void {
@@ -42,14 +52,14 @@ export type RenderFn = (opts: FrameFnInterface) => void;
 
 interface RenderDrawRefs {
 	canvas?: HTMLCanvasElement;
-	box?: CanvasBoxInterface;
+	box?: Partial<CanvasBoxInterface>;
 	onRendered?: RenderedFn;
 	layers: CanvasLayer[];
 }
 
 export interface RenderProviderProps {
 	canvas?: HTMLCanvasElement;
-	box?: CanvasBoxInterface;
+	box?: Partial<CanvasBoxInterface>;
 	onRendered?: RenderedFn;
 	children?: React.ReactNode;
 }
@@ -113,5 +123,9 @@ export const RenderProvider = React.forwardRef<
 
 	useImperativeHandle(ref, () => ({ render: drawCanvas }), [drawCanvas]);
 
-	return <LayerProvider onChange={setLayers}>{children}</LayerProvider>;
+	return (
+		<boxContext.Provider value={drawProps.box}>
+			<LayerProvider onChange={setLayers}>{children}</LayerProvider>;
+		</boxContext.Provider>
+	);
 });

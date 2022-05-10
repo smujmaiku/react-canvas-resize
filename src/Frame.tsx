@@ -16,7 +16,7 @@ export interface FrameProps {
 	canvas: HTMLCanvasElement;
 	onPreDraw?: OnDraw;
 	onDraw: OnDraw;
-	box?: CanvasBoxInterface;
+	box?: Partial<CanvasBoxInterface>;
 	zIndex?: number;
 	children?: React.ReactNode;
 }

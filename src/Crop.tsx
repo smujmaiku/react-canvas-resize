@@ -1,6 +1,10 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import Frame from './Frame';
-import { CanvasDrawInterface } from './RenderProvider';
+import {
+	CanvasBoxInterface,
+	CanvasDrawInterface,
+	useBox,
+} from './RenderProvider';
 
 export interface CropProps {
 	left: number;
@@ -20,18 +24,20 @@ export default function Crop(props: CropProps): JSX.Element {
 	);
 
 	useEffect(() => {
-		buffer.width = width - left;
-		buffer.height = height - top;
-	}, [buffer, left, top, width, height]);
+		buffer.width = width;
+		buffer.height = height;
+	}, [buffer, width, height]);
 
-	const box: CanvasBoxInterface = useMemo(
+	const parentBox = useBox();
+	const box: Partial<CanvasBoxInterface> = useMemo(
 		() => ({
-			left,
-			top,
+			...parentBox,
+			left: (parentBox?.left || 0) + left,
+			top: (parentBox?.top || 0) + top,
 			width,
 			height,
 		}),
-		[]
+		[parentBox, left, top, width, height]
 	);
 
 	const handleDraw = useCallback(
