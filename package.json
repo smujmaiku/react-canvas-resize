@@ -2,8 +2,8 @@
   "name": "react-canvas-resize",
   "version": "0.9.0",
   "description": "A canvas wrapper that resizes",
-  "main": "lib/CanvasResize.js",
-  "types": "lib/CanvasResize.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
     "lint": "eslint . --ext .ts,.tsx",

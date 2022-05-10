@@ -93,10 +93,3 @@ export default function CanvasResize(props: CanvasResizeProps): JSX.Element {
 		</div>
 	);
 }
-
-export { default as CanvasBase } from './CanvasBase';
-export { default as Layer } from './Layer';
-export { default as Crop } from './Crop';
-export { default as useAnimationFrame } from './animationFrame';
-export { default as useContainBox, containBox } from './containBox';
-export { useLayer, CanvasDrawInterface } from './RenderProvider';
