@@ -30,12 +30,18 @@ function Stats(): JSX.Element {
 
 		const {
 			scale,
+			width,
+			height,
+			left,
+			top,
 		} = box;
 
 		ctx.fillText(`fps: ${fps}`, 5, 15);
 		ctx.fillText(`interval: ${interval}`, 5, 30);
 		ctx.fillText(`count: ${count}`, 5, 45);
 		ctx.fillText(`scale: ${scale.toFixed(2)}`, 5, 60);
+		ctx.fillText(`size: ${width.toFixed(1)} x ${height.toFixed(1)}`, 5, 75);
+		ctx.fillText(`pos: ${left.toFixed(1)} x ${top.toFixed(1)}`, 5, 90);
 	}, []);
 
 	return <Layer onDraw={handleDraw} />;
@@ -120,11 +126,12 @@ function App(): JSX.Element {
 				}}
 				fillCanvas
 			>
+				<Stats />
 				<Crop
-					left={10}
+					left={110}
 					top={10}
 					width={120}
-					height={75}
+					height={105}
 					zIndex={99}
 				>
 					<Fill color="#CCC" />

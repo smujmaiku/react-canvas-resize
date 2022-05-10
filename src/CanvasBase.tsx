@@ -6,15 +6,13 @@ import React, {
 	useState,
 } from 'react';
 import useAnimationFrame from './animationFrame';
+import Layer from './Layer';
 import {
 	CanvasBoxInterface,
 	CanvasDrawInterface,
-	CanvasLayer,
-	CanvasProvider,
-} from './context';
-import Layer from './Layer';
-
-import sortLayers from './sortLayer';
+	RenderProvider,
+	RenderProviderRef,
+} from './RenderProvider';
 
 const noop = () => {
 	// noop;
@@ -57,72 +55,42 @@ export default function CanvasBase(props: CanvasBaseProps): JSX.Element {
 		...otherProps
 	} = props;
 
-	const [canvasEl, setCanvas] = useState<HTMLCanvasElement | null>(null);
+	const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
-	canvasRef.current = canvasEl;
+	canvasRef.current = canvas;
+
+	const [renderer, setRenderer] = useState<RenderProviderRef | null>(null);
+	const render = useMemo(() => renderer?.render || noop, [renderer]);
 
 	const buffer = useMemo(
 		(): HTMLCanvasElement => document.createElement('canvas'),
 		[]
 	);
 
-	const [layers, setLayers] = useState<CanvasLayer[]>([]);
-
-	const drawCanvas = useCallback(
-		(opts): void => {
-			const { count } = opts;
-
-			const canvas = canvasRef.current;
-			if (!canvas) {
-				throw new Error('Canvas is not ready');
-			}
-
-			if (count === 0 && onInit) {
-				onInit(canvas);
-			}
-
-			const orderedLayers = sortLayers(layers);
-
-			const frame: CanvasDrawInterface = {
-				box: {
-					left: 0,
-					top: 0,
-					width: canvas.width,
-					height: canvas.height,
-					scale: 1,
-					...(box || {}),
-					fullWidth: canvas.width,
-					fullHeight: canvas.height,
-				},
-				canvas,
-				...opts,
-			};
-			for (const [draw] of orderedLayers) {
-				draw(frame);
-			}
-
-			buffer.width = canvas.width;
-			buffer.height = canvas.height;
+	const handleRendered = useCallback(
+		(canvasEl: HTMLCanvasElement): void => {
+			buffer.width = canvasEl.width;
+			buffer.height = canvasEl.height;
 			const btx = buffer.getContext('2d');
 			if (btx) {
 				btx.clearRect(0, 0, buffer.width, buffer.height);
-				btx.drawImage(canvas, 0, 0);
+				btx.drawImage(canvasEl, 0, 0);
 			}
 		},
-		[box, canvasRef, onInit, layers, buffer]
+		[buffer]
 	);
-
-	const renderFrame = useAnimationFrame(drawCanvas, play);
+	const renderFrame = useAnimationFrame(render, play);
 
 	// Render new canvas
 	useEffect(() => {
+		if (!canvas) return;
 		renderFrame(true);
-	}, [renderFrame, canvasEl]);
+	}, [renderFrame, canvas]);
 
 	const redrawBuffer = useCallback(() => {
-		if (!canvasEl) return;
+		if (!canvas) return;
 
-		const ctx = canvasEl.getContext('2d');
+		const ctx = canvas.getContext('2d');
 		if (!ctx) return;
 
 		switch (resizePlan) {
@@ -132,36 +100,43 @@ export default function CanvasBase(props: CanvasBaseProps): JSX.Element {
 				ctx.drawImage(buffer, 0, 0);
 				break;
 			case 'stretch':
-				ctx.drawImage(buffer, 0, 0, canvasEl.width, canvasEl.height);
+				ctx.drawImage(buffer, 0, 0, canvas.width, canvas.height);
 				break;
 			case 'redrawsync':
 				renderFrame(true);
 				break;
 			default:
 		}
-	}, [canvasEl, buffer, resizePlan, renderFrame]);
+	}, [canvas, buffer, resizePlan, renderFrame]);
 
 	// Render on resize
 	useEffect(() => {
-		if (!canvasEl) return noop;
+		if (!canvas) return noop;
 
 		const resizeObserver = new ResizeObserver(() => {
 			renderFrame(false);
 			redrawBuffer();
 		});
-		resizeObserver.observe(canvasEl);
+		resizeObserver.observe(canvas);
 
 		return () => {
 			resizeObserver.disconnect();
 		};
-	}, [canvasEl, redrawBuffer, renderFrame]);
+	}, [canvas, redrawBuffer, renderFrame]);
 
 	return (
-		<CanvasProvider onChange={setLayers}>
-			<canvas {...otherProps} ref={setCanvas} width={width} height={height}>
-				{onDraw && <Layer onDraw={onDraw} />}
-				{children}
-			</canvas>
-		</CanvasProvider>
+		<canvas {...otherProps} ref={setCanvas} width={width} height={height}>
+			{canvas && (
+				<RenderProvider
+					ref={setRenderer}
+					canvas={canvas}
+					box={box}
+					onRendered={handleRendered}
+				>
+					{onDraw && <Layer onDraw={onDraw} />}
+					{children}
+				</RenderProvider>
+			)}
+		</canvas>
 	);
 }

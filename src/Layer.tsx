@@ -1,13 +1,4 @@
-import { useMemo } from 'react';
-import { CanvasLayer, OnDraw, useCanvasListing } from './context';
-
-export function useLayer(onDraw: OnDraw, zIndex = 0 as number): void {
-	const listing = useMemo(
-		(): CanvasLayer => [onDraw, zIndex],
-		[onDraw, zIndex]
-	);
-	useCanvasListing(listing);
-}
+import { OnDraw, useLayer } from './RenderProvider';
 
 export interface LayerProps {
 	onDraw: OnDraw;

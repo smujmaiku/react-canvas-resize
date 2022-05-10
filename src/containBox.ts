@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { CanvasBoxInterface } from './context';
+import { CanvasBoxInterface } from './RenderProvider';
 import useAnimationFrame from './animationFrame';
 
 export type ResizeBoxRatio = number | string | number[];
