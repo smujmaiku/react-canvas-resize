@@ -5,12 +5,11 @@ import React, {
 	useRef,
 	useState,
 } from 'react';
-import useAnimationFrame, { FrameFn, FrameFnInterface } from './animationFrame';
+import useAnimationFrame from './animationFrame';
 import Layer from './Layer';
 import {
 	CanvasBoxInterface,
 	CanvasDrawInterface,
-	RenderFn,
 	RenderProvider,
 	RenderProviderRef,
 } from './RenderProvider';
