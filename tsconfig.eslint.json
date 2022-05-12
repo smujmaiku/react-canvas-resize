@@ -3,7 +3,6 @@
 	"exclude": [
 		"node_modules",
 		"coverage",
-		"dist",
-		// Lint tests but dont compile them
+		"lib",
 	]
 }
