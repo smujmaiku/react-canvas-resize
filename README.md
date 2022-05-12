@@ -4,7 +4,7 @@ A canvas wrapper to resize and handle drawing
 
 ## Installation
 
-`npm i smujmaiku/react-canvas-resize`
+`npm i react-canvas-resize`
 
 ## Examples
 
@@ -30,4 +30,4 @@ const App = (props) => {
 
 ## License
 
-Copyright (c) 2021, Michael Szmadzinski. (MIT License)
+Copyright (c) 2022, Michael Szmadzinski. (MIT License)

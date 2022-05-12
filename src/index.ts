@@ -2,7 +2,7 @@ import CanvasResize from './CanvasResize';
 
 export default CanvasResize;
 
-export { CanvasResizeProps } from './CanvasResize';
+export { default as CanvasResize, CanvasResizeProps } from './CanvasResize';
 export { default as CanvasBase, CanvasBaseProps } from './CanvasBase';
 export { default as Layer, LayerProps } from './Layer';
 export { default as Frame, FrameProps } from './Frame';
