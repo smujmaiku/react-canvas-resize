@@ -46,7 +46,7 @@ export default function CanvasBase(props: CanvasBaseProps): JSX.Element {
 	const {
 		width,
 		height,
-		play,
+		play = false,
 		box,
 		resizePlan = 'stretch',
 		onInit,
