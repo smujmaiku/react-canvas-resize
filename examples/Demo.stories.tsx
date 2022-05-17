@@ -38,11 +38,12 @@ const COLORS = ['#F43', '#4F3', '#43F'];
 
 interface AppProps {
 	play?: boolean;
+	ratio: string;
 	onResize: (box: CanvasBoxInterface) => void;
 }
 
 function App(props: AppProps): JSX.Element {
-	const { play, onResize } = props;
+	const { play, ratio, onResize } = props;
 	const [color, setColor] = useState<string>('#F43');
 
 	useEffect(() => {
@@ -90,7 +91,7 @@ function App(props: AppProps): JSX.Element {
 			<Canvas
 				play={play}
 				className="canvas-wrap"
-				ratio="16x9"
+				ratio={ratio}
 				resizePlan="static"
 				onResize={onResize}
 				onDraw={handleDraw}
@@ -102,9 +103,9 @@ function App(props: AppProps): JSX.Element {
 				<Stats />
 				<Crop left={110} top={10} width={120} height={105} zIndex={99}>
 					<Fill color="#CCC" />
-					<Outline />
 					<Stats />
 				</Crop>
+				<Outline />
 			</Canvas>
 		</div>
 	);
@@ -115,6 +116,7 @@ export default {
 	component: App,
 	argTypes: {
 		play: { control: 'boolean' },
+		ratio: { control: 'text' }
 	},
 } as ComponentMeta<typeof App>;
 
@@ -124,4 +126,5 @@ export const DemoApp = Template.bind({});
 
 DemoApp.args = {
 	play: true,
+	ratio: '16x9',
 };

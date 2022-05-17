@@ -7,11 +7,11 @@ export default function Fill({ color }: { color: string }): null {
 			const ctx = canvas.getContext('2d');
 			if (!ctx) throw new Error();
 
-			const { width, height } = box;
+			const { fullWidth, fullHeight } = box;
 
 			ctx.save();
 			ctx.fillStyle = color;
-			ctx.fillRect(0, 0, width, height);
+			ctx.fillRect(0, 0, fullWidth, fullHeight);
 			ctx.restore();
 		},
 		[color]
