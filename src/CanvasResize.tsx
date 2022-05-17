@@ -5,11 +5,7 @@
  */
 
 import React, { useRef, useEffect } from 'react';
-import CanvasBase, {
-	CanvasBaseTypeProps,
-	HTMLCanvasProps,
-	ResizePlanT,
-} from './CanvasBase';
+import CanvasBase, { CanvasBaseTypeProps, HTMLCanvasProps } from './CanvasBase';
 import useContainBox, { ResizeBoxRatio } from './containBox';
 import { CanvasBoxInterface } from './RenderProvider';
 
@@ -26,7 +22,6 @@ export type CanvasResizeTypeProps = Omit<
 export interface CanvasResizeProps extends CanvasResizeTypeProps, HTMLDivProps {
 	canvasProps?: HTMLCanvasProps;
 	ratio?: ResizeBoxRatio;
-	resizePlan?: ResizePlanT;
 	onResize?: (box: CanvasBoxInterface) => void;
 	fillCanvas?: boolean;
 }
