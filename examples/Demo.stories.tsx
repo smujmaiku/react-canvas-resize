@@ -1,14 +1,15 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { css } from '@emotion/css';
 import React, { useState, useEffect, useCallback } from 'react';
+import { css } from '@emotion/css';
 import Canvas, {
-	useLayer,
 	Crop,
-	Layer,
 	CanvasDrawInterface,
 	CanvasBoxInterface,
-} from '.';
+} from '../src';
+import Fill from './Fill';
+import Outline from './Outline';
+import Stats from './Stats';
 
 const appStyles = css`
 	& {
@@ -34,49 +35,6 @@ const appStyles = css`
 `;
 
 const COLORS = ['#F43', '#4F3', '#43F'];
-
-function Fill({ color }: { color: string }): null {
-	const handleDraw = useCallback(
-		({ canvas, box }: CanvasDrawInterface): void => {
-			const ctx = canvas.getContext('2d');
-			if (!ctx) throw new Error();
-
-			const { width, height } = box;
-
-			ctx.save();
-
-			ctx.fillStyle = color;
-			ctx.fillRect(0, 0, width, height);
-
-			ctx.restore();
-		},
-		[color]
-	);
-
-	useLayer(handleDraw);
-	return null;
-}
-
-function StatsCard(): JSX.Element {
-	const handleDraw = useCallback(
-		({ canvas, fps, interval, count, box }: CanvasDrawInterface): void => {
-			const ctx = canvas.getContext('2d');
-			if (!ctx) throw new Error();
-
-			const { scale, width, height, left, top } = box;
-
-			ctx.fillText(`fps: ${fps}`, 5, 15);
-			ctx.fillText(`interval: ${interval}`, 5, 30);
-			ctx.fillText(`count: ${count}`, 5, 45);
-			ctx.fillText(`scale: ${scale.toFixed(2)}`, 5, 60);
-			ctx.fillText(`size: ${width.toFixed(1)} x ${height.toFixed(1)}`, 5, 75);
-			ctx.fillText(`pos: ${left.toFixed(1)} x ${top.toFixed(1)}`, 5, 90);
-		},
-		[]
-	);
-
-	return <Layer onDraw={handleDraw} />;
-}
 
 interface AppProps {
 	play?: boolean;
@@ -106,14 +64,6 @@ function App(props: AppProps): JSX.Element {
 			const ctx = canvas.getContext('2d');
 			if (!ctx) throw new Error();
 			ctx.clearRect(0, 0, fullWidth, fullHeight);
-
-			ctx.save();
-
-			ctx.translate(left, top);
-			ctx.strokeStyle = '#111';
-			ctx.strokeRect(2, 2, width - 4, height - 4);
-
-			ctx.restore();
 
 			ctx.save();
 
@@ -149,10 +99,11 @@ function App(props: AppProps): JSX.Element {
 				}}
 				fillCanvas
 			>
-				<StatsCard />
+				<Stats />
 				<Crop left={110} top={10} width={120} height={105} zIndex={99}>
 					<Fill color="#CCC" />
-					<StatsCard />
+					<Outline />
+					<Stats />
 				</Crop>
 			</Canvas>
 		</div>
@@ -160,7 +111,7 @@ function App(props: AppProps): JSX.Element {
 }
 
 export default {
-	title: 'Canvas/Demo',
+	title: 'Examples/App',
 	component: App,
 	argTypes: {
 		play: { control: 'boolean' },
@@ -169,8 +120,8 @@ export default {
 
 const Template: ComponentStory<typeof App> = (args) => <App {...args} />;
 
-export const Stats = Template.bind({});
+export const DemoApp = Template.bind({});
 
-Stats.args = {
+DemoApp.args = {
 	play: true,
 };
