@@ -1,4 +1,9 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, {
+	useCallback,
+	useEffect,
+	useImperativeHandle,
+	useMemo,
+} from 'react';
 import Frame from './Frame';
 import {
 	CanvasBoxInterface,
@@ -15,13 +20,15 @@ export interface CropProps {
 	children?: React.ReactNode;
 }
 
-export default function Crop(props: CropProps): JSX.Element {
+export const Crop = React.forwardRef((props: CropProps, ref): JSX.Element => {
 	const { left, top, width, height, zIndex = 0, children } = props;
 
 	const buffer = useMemo(
 		(): HTMLCanvasElement => document.createElement('canvas'),
 		[]
 	);
+
+	useImperativeHandle(ref, () => buffer, [buffer]);
 
 	useEffect(() => {
 		buffer.width = width;
@@ -57,4 +64,6 @@ export default function Crop(props: CropProps): JSX.Element {
 			{children}
 		</Frame>
 	);
-}
+});
+
+export default Crop;

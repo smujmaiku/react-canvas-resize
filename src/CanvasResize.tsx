@@ -23,7 +23,6 @@ export interface CanvasResizeProps extends CanvasResizeTypeProps, HTMLDivProps {
 	canvasProps?: HTMLCanvasProps;
 	ratio?: ResizeBoxRatio;
 	onResize?: (box: CanvasBoxInterface) => void;
-	fillCanvas?: boolean;
 }
 
 /**
@@ -38,7 +37,6 @@ export default function CanvasResize(props: CanvasResizeProps): JSX.Element {
 		onInit,
 		onDraw,
 		onResize,
-		fillCanvas,
 		children,
 		...divProps
 	} = props;
@@ -51,11 +49,6 @@ export default function CanvasResize(props: CanvasResizeProps): JSX.Element {
 		if (!onResize) return;
 		onResize(box);
 	}, [box, onResize]);
-
-	const width = fillCanvas ? box.fullWidth : box.width;
-	const height = fillCanvas ? box.fullHeight : box.height;
-	const left = fillCanvas ? 0 : box.left;
-	const top = fillCanvas ? 0 : box.top;
 
 	return (
 		<div
@@ -72,11 +65,11 @@ export default function CanvasResize(props: CanvasResizeProps): JSX.Element {
 				style={{
 					...canvasProps.style,
 					margin: 0,
-					marginLeft: left,
-					marginTop: top,
+					marginLeft: box.left,
+					marginTop: box.top,
 				}}
-				width={width}
-				height={height}
+				width={box.width}
+				height={box.height}
 				box={box}
 				play={play}
 				resizePlan={resizePlan}

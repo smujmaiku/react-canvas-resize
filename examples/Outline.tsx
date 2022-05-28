@@ -7,11 +7,10 @@ export default function Outline(): JSX.Element {
 			const ctx = canvas.getContext('2d');
 			if (!ctx) throw new Error();
 
-			const { width, height, left, top } = box;
+			const { width, height } = box;
 
 			ctx.save();
 
-			ctx.translate(left, top);
 			ctx.strokeStyle = '#111';
 			ctx.strokeRect(2, 2, width - 4, height - 4);
 

@@ -6,6 +6,7 @@ import Canvas, {
 	Crop,
 	CanvasDrawInterface,
 	CanvasBoxInterface,
+	useLayer,
 } from '../src';
 import Fill from './Fill';
 import Outline from './Outline';
@@ -22,10 +23,10 @@ const appStyles = css`
 	}
 
 	& .canvas-wrap {
-		width: 90vw;
-		height: 90vh;
-		margin-left: 5vw;
-		margin-top: 5vh;
+		width: 100vw;
+		height: 100vh;
+		margin-left: 0;
+		margin-top: 0;
 	}
 
 	& .canvas {
@@ -36,14 +37,7 @@ const appStyles = css`
 
 const COLORS = ['#F43', '#4F3', '#43F'];
 
-interface AppProps {
-	play?: boolean;
-	ratio: string;
-	onResize: (box: CanvasBoxInterface) => void;
-}
-
-function App(props: AppProps): JSX.Element {
-	const { play, ratio, onResize } = props;
+function WiggleLine(): null {
 	const [color, setColor] = useState<string>('#F43');
 
 	useEffect(() => {
@@ -60,11 +54,10 @@ function App(props: AppProps): JSX.Element {
 
 	const handleDraw = useCallback(
 		({ canvas, now, box }: CanvasDrawInterface): void => {
-			const { width, height, left, top, fullWidth, fullHeight, scale } = box;
+			const { width, height, scale } = box;
 
 			const ctx = canvas.getContext('2d');
 			if (!ctx) throw new Error();
-			ctx.clearRect(0, 0, fullWidth, fullHeight);
 
 			ctx.save();
 
@@ -73,7 +66,7 @@ function App(props: AppProps): JSX.Element {
 			const ex = Math.cos((now + 100) / 300) * 4 * scale;
 			const ey = Math.sin((now + 100) / 120) * 4 * scale;
 
-			ctx.translate(left + width / 2, top + height / 2);
+			ctx.translate(width / 2, height / 2);
 			ctx.lineWidth = scale;
 			ctx.strokeStyle = color;
 			ctx.beginPath();
@@ -82,8 +75,31 @@ function App(props: AppProps): JSX.Element {
 			ctx.stroke();
 
 			ctx.restore();
+		}, [color]);
+
+	useLayer(handleDraw);
+
+	return null;
+}
+
+interface AppProps {
+	play?: boolean;
+	ratio: string;
+	onResize: (box: CanvasBoxInterface) => void;
+}
+
+function App(props: AppProps): JSX.Element {
+	const { play, ratio, onResize } = props;
+
+	const handleDraw = useCallback(
+		({ canvas, box }: CanvasDrawInterface): void => {
+			const { width, height } = box;
+
+			const ctx = canvas.getContext('2d');
+			if (!ctx) throw new Error();
+			ctx.clearRect(0, 0, width, height);
 		},
-		[color]
+		[]
 	);
 
 	return (
@@ -98,8 +114,8 @@ function App(props: AppProps): JSX.Element {
 				canvasProps={{
 					className: 'canvas',
 				}}
-				fillCanvas
 			>
+				<WiggleLine />
 				<Stats />
 				<Crop left={110} top={10} width={120} height={105} zIndex={99}>
 					<Fill color="#CCC" />
