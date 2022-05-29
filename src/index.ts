@@ -7,6 +7,7 @@ export { default as CanvasBase, CanvasBaseProps } from './CanvasBase';
 export { default as Layer, LayerProps } from './Layer';
 export { default as Frame, FrameProps } from './Frame';
 export { default as Crop, CropProps } from './Crop';
+export { default as CropRatio, CropRatioProps } from './CropRatio';
 export {
 	default as useAnimationFrame,
 	FrameFnInterface,

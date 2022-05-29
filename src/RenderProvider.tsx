@@ -29,6 +29,12 @@ export interface CanvasDrawInterface extends FrameFnInterface {
 export type OnDraw = (frame: CanvasDrawInterface) => void;
 export type CanvasLayer = [draw: OnDraw, zIndex: number];
 
+const canvasContext = createContext<HTMLCanvasElement | undefined>(undefined);
+
+export function useCanvas(): HTMLCanvasElement | undefined {
+	return useContext(canvasContext);
+}
+
 const boxContext = createContext<Partial<CanvasBoxInterface> | undefined>(
 	undefined
 );
@@ -124,8 +130,10 @@ export const RenderProvider = React.forwardRef<
 	useImperativeHandle(ref, () => ({ render: drawCanvas }), [drawCanvas]);
 
 	return (
-		<boxContext.Provider value={drawProps.box}>
-			<LayerProvider onChange={setLayers}>{children}</LayerProvider>;
-		</boxContext.Provider>
+		<canvasContext.Provider value={drawProps.canvas}>
+			<boxContext.Provider value={drawProps.box}>
+				<LayerProvider onChange={setLayers}>{children}</LayerProvider>;
+			</boxContext.Provider>
+		</canvasContext.Provider>
 	);
 });

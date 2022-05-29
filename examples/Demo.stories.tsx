@@ -2,8 +2,10 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { css } from '@emotion/css';
-import Canvas, {
+import CanvasResize, {
+	CanvasBase,
 	Crop,
+	CropRatio,
 	CanvasDrawInterface,
 	CanvasBoxInterface,
 	useLayer,
@@ -11,6 +13,15 @@ import Canvas, {
 import Fill from './Fill';
 import Outline from './Outline';
 import Stats from './Stats';
+
+export default {
+	title: 'Examples/App',
+	component: CanvasResizeApp,
+	argTypes: {
+		play: { control: 'boolean' },
+		ratio: { control: 'text' }
+	},
+} as ComponentMeta<typeof CanvasResizeApp>;
 
 const appStyles = css`
 	& {
@@ -88,7 +99,7 @@ interface AppProps {
 	onResize: (box: CanvasBoxInterface) => void;
 }
 
-function App(props: AppProps): JSX.Element {
+function CanvasResizeApp(props: AppProps): JSX.Element {
 	const { play, ratio, onResize } = props;
 
 	const handleDraw = useCallback(
@@ -104,7 +115,7 @@ function App(props: AppProps): JSX.Element {
 
 	return (
 		<div className={appStyles}>
-			<Canvas
+			<CanvasResize
 				play={play}
 				className="canvas-wrap"
 				ratio={ratio}
@@ -122,25 +133,66 @@ function App(props: AppProps): JSX.Element {
 					<Stats />
 				</Crop>
 				<Outline />
-			</Canvas>
+			</CanvasResize>
 		</div>
 	);
 }
 
-export default {
-	title: 'Examples/App',
-	component: App,
-	argTypes: {
-		play: { control: 'boolean' },
-		ratio: { control: 'text' }
-	},
-} as ComponentMeta<typeof App>;
+const CanvasResizeTemplate: ComponentStory<typeof CanvasResizeApp> = (args) => <CanvasResizeApp {...args} />;
 
-const Template: ComponentStory<typeof App> = (args) => <App {...args} />;
+export const CanvasResizeDemo = CanvasResizeTemplate.bind({});
 
-export const DemoApp = Template.bind({});
+CanvasResizeDemo.args = {
+	play: true,
+	ratio: '16x9',
+};
 
-DemoApp.args = {
+function CropRatioApp(props: AppProps): JSX.Element {
+	const { play, ratio } = props;
+
+	const handleDraw = useCallback(
+		({ canvas, box }: CanvasDrawInterface): void => {
+			const { width, height } = box;
+
+			const ctx = canvas.getContext('2d');
+			if (!ctx) throw new Error();
+			ctx.clearRect(0, 0, width, height);
+		},
+		[]
+	);
+
+	return (
+		<div className={appStyles}>
+			<CanvasBase
+				play={play}
+				className="canvas"
+				// resizePlan="static"
+				onDraw={handleDraw}
+				width={500}
+				height={500}
+			>
+				<Stats />
+				<CropRatio
+					ratio={ratio}
+				>
+					<Stats />
+					<WiggleLine />
+					<Crop left={110} top={10} width={120} height={105} zIndex={99}>
+						<Fill color="#CCC" />
+						<Stats />
+					</Crop>
+					<Outline />
+				</CropRatio>
+			</CanvasBase>
+		</div>
+	);
+}
+
+const CropRatioTemplate: ComponentStory<typeof CropRatioApp> = (args) => <CropRatioApp {...args} />;
+
+export const CropRatioDemo = CropRatioTemplate.bind({});
+
+CropRatioDemo.args = {
 	play: true,
 	ratio: '16x9',
 };

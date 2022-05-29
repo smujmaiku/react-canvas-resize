@@ -47,6 +47,19 @@ export const Crop = React.forwardRef((props: CropProps, ref): JSX.Element => {
 		[parentBox, left, top, width, height]
 	);
 
+	const handlePreDraw = useCallback(
+		(frame: CanvasDrawInterface): void => {
+			const { canvas } = frame;
+
+			const btx = buffer.getContext('2d');
+			if (!btx) return;
+
+			btx.clearRect(0, 0, buffer.width, buffer.height);
+			btx.drawImage(canvas, -left, -top);
+		},
+		[buffer, left, top]
+	);
+
 	const handleDraw = useCallback(
 		(frame: CanvasDrawInterface): void => {
 			const { canvas } = frame;
@@ -60,7 +73,13 @@ export const Crop = React.forwardRef((props: CropProps, ref): JSX.Element => {
 	);
 
 	return (
-		<Frame canvas={buffer} onDraw={handleDraw} zIndex={zIndex} box={box}>
+		<Frame
+			canvas={buffer}
+			onPreDraw={handlePreDraw}
+			onDraw={handleDraw}
+			zIndex={zIndex}
+			box={box}
+		>
 			{children}
 		</Frame>
 	);
