@@ -15,9 +15,5 @@ export default function CropRatio(props: CropRatioProps) {
 
 	const box = useContainBox(cropRef, ratio);
 
-	return (
-		<Crop left={box.left} top={box.top} width={box.width} height={box.height}>
-			{children}
-		</Crop>
-	);
+	return <Crop {...box}>{children}</Crop>;
 }

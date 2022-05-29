@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import { CanvasBoxInterface } from './RenderProvider';
 import useAnimationFrame from './animationFrame';
 
 export type ResizeBoxRatio = number | string | number[];
@@ -16,13 +15,20 @@ export function containBox(box: number[], container: number[]): number[] {
 	return box.map((v) => v * scale);
 }
 
+export interface ContainBoxInterface {
+	left: number;
+	top: number;
+	width: number;
+	height: number;
+}
+
 /**
  * Contained box based on ref hook
  */
 export default function useContainBox(
 	ref: React.RefObject<HTMLElement>,
 	ratio: ResizeBoxRatio
-): CanvasBoxInterface {
+): ContainBoxInterface {
 	let ratioX = 1;
 	let ratioY = 1;
 
@@ -36,14 +42,11 @@ export default function useContainBox(
 		[ratioX = 1, ratioY = 1] = ratio as number[];
 	}
 
-	const [box, setBox] = useState<CanvasBoxInterface>({
+	const [box, setBox] = useState<ContainBoxInterface>({
 		left: 0,
 		top: 0,
 		width: 1,
 		height: 1,
-		fullWidth: 1,
-		fullHeight: 1,
-		scale: 1,
 	});
 
 	const checkResize = useCallback((): void => {
@@ -52,14 +55,11 @@ export default function useContainBox(
 
 		const { offsetWidth, offsetHeight } = root;
 
-		const newBox: CanvasBoxInterface = {
+		const newBox: ContainBoxInterface = {
 			left: 0,
 			top: 0,
 			width: offsetWidth,
 			height: offsetHeight,
-			fullWidth: offsetWidth,
-			fullHeight: offsetHeight,
-			scale: 1,
 		};
 
 		[newBox.width, newBox.height] = containBox(
@@ -70,9 +70,8 @@ export default function useContainBox(
 		newBox.top = Math.floor((offsetHeight - newBox.height) / 2);
 		newBox.width = Math.floor(newBox.width);
 		newBox.height = Math.floor(newBox.height);
-		newBox.scale = newBox.width / ratioX;
 
-		setBox((orig: CanvasBoxInterface): CanvasBoxInterface => {
+		setBox((orig: ContainBoxInterface): ContainBoxInterface => {
 			if (
 				newBox.width === orig.width &&
 				newBox.height === orig.height &&

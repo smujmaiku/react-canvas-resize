@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { ComponentStory } from '@storybook/react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { css } from '@emotion/css';
 import CanvasResize, {
@@ -7,21 +7,20 @@ import CanvasResize, {
 	Crop,
 	CropRatio,
 	CanvasDrawInterface,
-	CanvasBoxInterface,
 	useLayer,
 } from '../src';
 import Fill from './Fill';
 import Outline from './Outline';
 import Stats from './Stats';
+import { ResizeFn } from '../src/RenderProvider';
 
 export default {
 	title: 'Examples/App',
-	component: CanvasResizeApp,
 	argTypes: {
 		play: { control: 'boolean' },
-		ratio: { control: 'text' }
+		ratio: { control: 'text' },
 	},
-} as ComponentMeta<typeof CanvasResizeApp>;
+};
 
 const appStyles = css`
 	& {
@@ -66,20 +65,20 @@ function WiggleLine(): null {
 	const handleDraw = useCallback(
 		({ canvas, now }: CanvasDrawInterface): void => {
 			const { width, height } = canvas;
-			const scale = Math.min(width, height) / 10;;
+			const size = Math.min(width, height) / 10;
 
 			const ctx = canvas.getContext('2d');
 			if (!ctx) throw new Error();
 
 			ctx.save();
 
-			const sx = Math.cos(now / 300) * 4 * scale;
-			const sy = Math.sin(now / 120) * 4 * scale;
-			const ex = Math.cos((now + 100) / 300) * 4 * scale;
-			const ey = Math.sin((now + 100) / 120) * 4 * scale;
+			const sx = Math.cos(now / 300) * 4 * size;
+			const sy = Math.sin(now / 120) * 4 * size;
+			const ex = Math.cos((now + 100) / 300) * 4 * size;
+			const ey = Math.sin((now + 100) / 120) * 4 * size;
 
 			ctx.translate(width / 2, height / 2);
-			ctx.lineWidth = scale;
+			ctx.lineWidth = size;
 			ctx.strokeStyle = color;
 			ctx.beginPath();
 			ctx.moveTo(sx, sy);
@@ -87,7 +86,9 @@ function WiggleLine(): null {
 			ctx.stroke();
 
 			ctx.restore();
-		}, [color]);
+		},
+		[color]
+	);
 
 	useLayer(handleDraw);
 
@@ -97,22 +98,20 @@ function WiggleLine(): null {
 interface AppProps {
 	play?: boolean;
 	ratio: string;
-	onResize: (box: CanvasBoxInterface) => void;
+	// eslint-disable-next-line react/no-unused-prop-types
+	onResize: ResizeFn;
 }
 
 function CanvasResizeApp(props: AppProps): JSX.Element {
 	const { play, ratio, onResize } = props;
 
-	const handleDraw = useCallback(
-		({ canvas }: CanvasDrawInterface): void => {
-			const { width, height } = canvas;
+	const handleDraw = useCallback(({ canvas }: CanvasDrawInterface): void => {
+		const { width, height } = canvas;
 
-			const ctx = canvas.getContext('2d');
-			if (!ctx) throw new Error();
-			ctx.clearRect(0, 0, width, height);
-		},
-		[]
-	);
+		const ctx = canvas.getContext('2d');
+		if (!ctx) throw new Error();
+		ctx.clearRect(0, 0, width, height);
+	}, []);
 
 	return (
 		<div className={appStyles}>
@@ -139,7 +138,9 @@ function CanvasResizeApp(props: AppProps): JSX.Element {
 	);
 }
 
-const CanvasResizeTemplate: ComponentStory<typeof CanvasResizeApp> = (args) => <CanvasResizeApp {...args} />;
+const CanvasResizeTemplate: ComponentStory<typeof CanvasResizeApp> = (args) => (
+	<CanvasResizeApp {...args} />
+);
 
 export const CanvasResizeDemo = CanvasResizeTemplate.bind({});
 
@@ -151,16 +152,13 @@ CanvasResizeDemo.args = {
 function CropRatioApp(props: AppProps): JSX.Element {
 	const { play, ratio } = props;
 
-	const handleDraw = useCallback(
-		({ canvas }: CanvasDrawInterface): void => {
-			const { width, height } = canvas;
+	const handleDraw = useCallback(({ canvas }: CanvasDrawInterface): void => {
+		const { width, height } = canvas;
 
-			const ctx = canvas.getContext('2d');
-			if (!ctx) throw new Error();
-			ctx.clearRect(0, 0, width, height);
-		},
-		[]
-	);
+		const ctx = canvas.getContext('2d');
+		if (!ctx) throw new Error();
+		ctx.clearRect(0, 0, width, height);
+	}, []);
 
 	return (
 		<div className={appStyles}>
@@ -171,9 +169,7 @@ function CropRatioApp(props: AppProps): JSX.Element {
 				onDraw={handleDraw}
 			>
 				<Stats />
-				<CropRatio
-					ratio={ratio}
-				>
+				<CropRatio ratio={ratio}>
 					<Stats />
 					<WiggleLine />
 					<Crop left={110} top={10} width={120} height={70} zIndex={99}>
@@ -187,7 +183,9 @@ function CropRatioApp(props: AppProps): JSX.Element {
 	);
 }
 
-const CropRatioTemplate: ComponentStory<typeof CropRatioApp> = (args) => <CropRatioApp {...args} />;
+const CropRatioTemplate: ComponentStory<typeof CropRatioApp> = (args) => (
+	<CropRatioApp {...args} />
+);
 
 export const CropRatioDemo = CropRatioTemplate.bind({});
 

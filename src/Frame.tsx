@@ -3,7 +3,6 @@ import {
 	useLayer,
 	RenderProvider,
 	OnDraw,
-	CanvasBoxInterface,
 	RenderProviderRef,
 	CanvasDrawInterface,
 } from './RenderProvider';
@@ -16,7 +15,6 @@ export interface FrameProps {
 	canvas: HTMLCanvasElement;
 	onPreDraw?: OnDraw;
 	onDraw: OnDraw;
-	box?: Partial<CanvasBoxInterface>;
 	zIndex?: number;
 	children?: React.ReactNode;
 }
@@ -27,7 +25,7 @@ interface FrameCbRefs {
 }
 
 export default function Frame(props: FrameProps): JSX.Element {
-	const { canvas, onPreDraw, onDraw, box, zIndex = 0, children } = props;
+	const { canvas, onPreDraw, onDraw, zIndex = 0, children } = props;
 
 	const [renderer, setRenderer] = useState<RenderProviderRef | null>(null);
 	const render = useMemo(() => renderer?.render || noop, [renderer]);
@@ -47,7 +45,7 @@ export default function Frame(props: FrameProps): JSX.Element {
 	useLayer(handleDraw, zIndex);
 
 	return (
-		<RenderProvider ref={setRenderer} canvas={canvas} box={box}>
+		<RenderProvider ref={setRenderer} canvas={canvas}>
 			{children}
 		</RenderProvider>
 	);

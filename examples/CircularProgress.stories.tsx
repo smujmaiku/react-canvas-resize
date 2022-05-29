@@ -14,7 +14,10 @@ export default {
 	},
 } as ComponentMeta<typeof CircularProgress>;
 
-const Template: ComponentStory<typeof CircularProgress> = ({ play, ...args }) => (
+const Template: ComponentStory<typeof CircularProgress> = ({
+	play,
+	...args
+}) => (
 	<Canvas style={{ width: 400, height: 300 }} play={play}>
 		<Fill color="white" />
 		<CircularProgress {...args} />

@@ -5,11 +5,7 @@ import React, {
 	useMemo,
 } from 'react';
 import Frame from './Frame';
-import {
-	CanvasBoxInterface,
-	CanvasDrawInterface,
-	useBox,
-} from './RenderProvider';
+import { CanvasDrawInterface } from './RenderProvider';
 
 export interface CropProps {
 	left: number;
@@ -34,18 +30,6 @@ export const Crop = React.forwardRef((props: CropProps, ref): JSX.Element => {
 		buffer.width = width;
 		buffer.height = height;
 	}, [buffer, width, height]);
-
-	const parentBox = useBox();
-	const box: Partial<CanvasBoxInterface> = useMemo(
-		() => ({
-			...parentBox,
-			left: (parentBox?.left || 0) + left,
-			top: (parentBox?.top || 0) + top,
-			width,
-			height,
-		}),
-		[parentBox, left, top, width, height]
-	);
 
 	const handlePreDraw = useCallback(
 		(frame: CanvasDrawInterface): void => {
@@ -78,7 +62,6 @@ export const Crop = React.forwardRef((props: CropProps, ref): JSX.Element => {
 			onPreDraw={handlePreDraw}
 			onDraw={handleDraw}
 			zIndex={zIndex}
-			box={box}
 		>
 			{children}
 		</Frame>
