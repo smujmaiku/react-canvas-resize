@@ -3,15 +3,15 @@ import { useLayer, CanvasDrawInterface } from '../src';
 
 export default function Fill({ color }: { color: string }): null {
 	const handleDraw = useCallback(
-		({ canvas, box }: CanvasDrawInterface): void => {
+		({ canvas }: CanvasDrawInterface): void => {
 			const ctx = canvas.getContext('2d');
 			if (!ctx) throw new Error();
 
-			const { fullWidth, fullHeight } = box;
+			const { width, height } = canvas;
 
 			ctx.save();
 			ctx.fillStyle = color;
-			ctx.fillRect(0, 0, fullWidth, fullHeight);
+			ctx.fillRect(0, 0, width, height);
 			ctx.restore();
 		},
 		[color]

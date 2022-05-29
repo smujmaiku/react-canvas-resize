@@ -103,8 +103,8 @@ function CanvasResizeApp(props: AppProps): JSX.Element {
 	const { play, ratio, onResize } = props;
 
 	const handleDraw = useCallback(
-		({ canvas, box }: CanvasDrawInterface): void => {
-			const { width, height } = box;
+		({ canvas }: CanvasDrawInterface): void => {
+			const { width, height } = canvas;
 
 			const ctx = canvas.getContext('2d');
 			if (!ctx) throw new Error();
@@ -151,8 +151,8 @@ function CropRatioApp(props: AppProps): JSX.Element {
 	const { play, ratio } = props;
 
 	const handleDraw = useCallback(
-		({ canvas, box }: CanvasDrawInterface): void => {
-			const { width, height } = box;
+		({ canvas }: CanvasDrawInterface): void => {
+			const { width, height } = canvas;
 
 			const ctx = canvas.getContext('2d');
 			if (!ctx) throw new Error();
