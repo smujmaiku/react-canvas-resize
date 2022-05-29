@@ -165,11 +165,9 @@ function CropRatioApp(props: AppProps): JSX.Element {
 		<div className={appStyles}>
 			<CanvasBase
 				play={play}
-				className="canvas"
-				// resizePlan="static"
+				className="canvas-wrap canvas"
+				resizePlan="static"
 				onDraw={handleDraw}
-				width={500}
-				height={500}
 			>
 				<Stats />
 				<CropRatio

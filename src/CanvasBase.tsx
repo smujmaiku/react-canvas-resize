@@ -26,8 +26,6 @@ export type HTMLCanvasProps = React.DetailedHTMLProps<
 export type ResizePlanT = 'clear' | 'static' | 'stretch' | 'redrawsync';
 
 export interface CanvasBaseTypeProps {
-	width: number;
-	height: number;
 	play?: boolean;
 	box?: CanvasBoxInterface;
 	resizePlan?: ResizePlanT;
@@ -44,8 +42,6 @@ export interface CanvasBaseProps extends HTMLCanvasProps, CanvasBaseTypeProps {
  */
 export default function CanvasBase(props: CanvasBaseProps): JSX.Element {
 	const {
-		width,
-		height,
 		play = false,
 		box,
 		resizePlan = 'stretch',
@@ -109,11 +105,16 @@ export default function CanvasBase(props: CanvasBaseProps): JSX.Element {
 		}
 	}, [canvas, buffer, resizePlan, renderFrame]);
 
+	const [width, setWidth] = useState(0);
+	const [height, setHeight] = useState(0);
+
 	// Render on resize
 	useEffect(() => {
 		if (!canvas) return noop;
 
 		const resizeObserver = new ResizeObserver(() => {
+			setWidth(canvas.offsetWidth);
+			setHeight(canvas.offsetHeight);
 			renderFrame(false);
 			redrawBuffer();
 		});
@@ -125,7 +126,7 @@ export default function CanvasBase(props: CanvasBaseProps): JSX.Element {
 	}, [canvas, redrawBuffer, renderFrame]);
 
 	return (
-		<canvas {...otherProps} ref={setCanvas} width={width} height={height}>
+		<canvas width={width} height={height} {...otherProps} ref={setCanvas}>
 			{canvas && (
 				<RenderProvider
 					ref={setRenderer}
