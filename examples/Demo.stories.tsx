@@ -64,8 +64,9 @@ function WiggleLine(): null {
 	}, []);
 
 	const handleDraw = useCallback(
-		({ canvas, now, box }: CanvasDrawInterface): void => {
-			const { width, height, scale } = box;
+		({ canvas, now }: CanvasDrawInterface): void => {
+			const { width, height } = canvas;
+			const scale = Math.min(width, height) / 10;;
 
 			const ctx = canvas.getContext('2d');
 			if (!ctx) throw new Error();
@@ -128,7 +129,7 @@ function CanvasResizeApp(props: AppProps): JSX.Element {
 			>
 				<WiggleLine />
 				<Stats />
-				<Crop left={110} top={10} width={120} height={105} zIndex={99}>
+				<Crop left={110} top={10} width={120} height={70} zIndex={99}>
 					<Fill color="#CCC" />
 					<Stats />
 				</Crop>
@@ -175,7 +176,7 @@ function CropRatioApp(props: AppProps): JSX.Element {
 				>
 					<Stats />
 					<WiggleLine />
-					<Crop left={110} top={10} width={120} height={105} zIndex={99}>
+					<Crop left={110} top={10} width={120} height={70} zIndex={99}>
 						<Fill color="#CCC" />
 						<Stats />
 					</Crop>
