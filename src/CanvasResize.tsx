@@ -4,14 +4,9 @@
  * MIT Licensed
  */
 
-import React, { useRef, useEffect } from 'react';
-import CanvasBase, {
-	CanvasBaseTypeProps,
-	HTMLCanvasProps,
-	ResizePlanT,
-} from './CanvasBase';
+import React, { useRef } from 'react';
+import CanvasBase, { CanvasBaseTypeProps, HTMLCanvasProps } from './CanvasBase';
 import useContainBox, { ResizeBoxRatio } from './containBox';
-import { CanvasBoxInterface } from './RenderProvider';
 
 export type HTMLDivProps = React.DetailedHTMLProps<
 	React.HTMLAttributes<HTMLDivElement>,
@@ -20,15 +15,12 @@ export type HTMLDivProps = React.DetailedHTMLProps<
 
 export type CanvasResizeTypeProps = Omit<
 	CanvasBaseTypeProps,
-	'width' | 'height' | 'box'
+	'width' | 'height'
 >;
 
 export interface CanvasResizeProps extends CanvasResizeTypeProps, HTMLDivProps {
 	canvasProps?: HTMLCanvasProps;
 	ratio?: ResizeBoxRatio;
-	resizePlan?: ResizePlanT;
-	onResize?: (box: CanvasBoxInterface) => void;
-	fillCanvas?: boolean;
 }
 
 /**
@@ -43,24 +35,12 @@ export default function CanvasResize(props: CanvasResizeProps): JSX.Element {
 		onInit,
 		onDraw,
 		onResize,
-		fillCanvas,
 		children,
 		...divProps
 	} = props;
 
 	const rootRef = useRef<HTMLDivElement>(null);
-
 	const box = useContainBox(rootRef, ratio);
-
-	useEffect(() => {
-		if (!onResize) return;
-		onResize(box);
-	}, [box, onResize]);
-
-	const width = fillCanvas ? box.fullWidth : box.width;
-	const height = fillCanvas ? box.fullHeight : box.height;
-	const left = fillCanvas ? 0 : box.left;
-	const top = fillCanvas ? 0 : box.top;
 
 	return (
 		<div
@@ -77,16 +57,16 @@ export default function CanvasResize(props: CanvasResizeProps): JSX.Element {
 				style={{
 					...canvasProps.style,
 					margin: 0,
-					marginLeft: left,
-					marginTop: top,
+					marginLeft: box.left,
+					marginTop: box.top,
 				}}
-				width={width}
-				height={height}
-				box={box}
+				width={box.width}
+				height={box.height}
 				play={play}
 				resizePlan={resizePlan}
 				onInit={onInit}
 				onDraw={onDraw}
+				onResize={onResize}
 			>
 				{children}
 			</CanvasBase>

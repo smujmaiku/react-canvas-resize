@@ -8,10 +8,10 @@ import React, {
 import useAnimationFrame from './animationFrame';
 import Layer from './Layer';
 import {
-	CanvasBoxInterface,
 	CanvasDrawInterface,
 	RenderProvider,
 	RenderProviderRef,
+	ResizeFn,
 } from './RenderProvider';
 
 const noop = () => {
@@ -24,19 +24,20 @@ export type HTMLCanvasProps = React.DetailedHTMLProps<
 >;
 
 export type ResizePlanT = 'clear' | 'static' | 'stretch' | 'redrawsync';
+export type InitFn = (canvas: HTMLCanvasElement) => void;
+export type DrawFn = (frame: CanvasDrawInterface) => void;
 
 export interface CanvasBaseTypeProps {
-	width: number;
-	height: number;
 	play?: boolean;
-	box?: CanvasBoxInterface;
 	resizePlan?: ResizePlanT;
-	onInit?: (canvas: HTMLCanvasElement) => void;
-	onDraw?: (frame: CanvasDrawInterface) => void;
+	onInit?: InitFn;
+	onDraw?: DrawFn;
+	onResize?: ResizeFn;
 }
 
 export interface CanvasBaseProps extends HTMLCanvasProps, CanvasBaseTypeProps {
-	// Just extend
+	height?: number | string | undefined;
+	width?: number | string | undefined;
 }
 
 /**
@@ -44,11 +45,9 @@ export interface CanvasBaseProps extends HTMLCanvasProps, CanvasBaseTypeProps {
  */
 export default function CanvasBase(props: CanvasBaseProps): JSX.Element {
 	const {
-		width,
-		height,
 		play = false,
-		box,
 		resizePlan = 'stretch',
+		onResize,
 		onInit,
 		onDraw,
 		children,
@@ -109,28 +108,33 @@ export default function CanvasBase(props: CanvasBaseProps): JSX.Element {
 		}
 	}, [canvas, buffer, resizePlan, renderFrame]);
 
-	// Render on resize
-	useEffect(() => {
-		if (!canvas) return noop;
+	const [width, setWidth] = useState(0);
+	const [height, setHeight] = useState(0);
 
-		const resizeObserver = new ResizeObserver(() => {
+	// Render on resize
+	const handleResize = useCallback(
+		(element) => {
+			if (!canvas) return;
+
+			setWidth(canvas.offsetWidth);
+			setHeight(canvas.offsetHeight);
 			renderFrame(false);
 			redrawBuffer();
-		});
-		resizeObserver.observe(canvas);
 
-		return () => {
-			resizeObserver.disconnect();
-		};
-	}, [canvas, redrawBuffer, renderFrame]);
+			if (onResize) {
+				onResize(element);
+			}
+		},
+		[canvas, renderFrame, redrawBuffer, onResize]
+	);
 
 	return (
-		<canvas {...otherProps} ref={setCanvas} width={width} height={height}>
+		<canvas width={width} height={height} {...otherProps} ref={setCanvas}>
 			{canvas && (
 				<RenderProvider
 					ref={setRenderer}
+					onResize={handleResize}
 					canvas={canvas}
-					box={box}
 					onRendered={handleRendered}
 				>
 					{onDraw && <Layer onDraw={onDraw} />}

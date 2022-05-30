@@ -8,6 +8,9 @@ node_modules
 coverage
 benchmarks/graphs
 
+# Storybook
+storybook-static
+
 # General Garbage
 *.log
 *.gz
