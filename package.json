@@ -12,6 +12,8 @@
     "test:ci": "jest",
     "test:coverage": "jest --coverage",
     "storybook": "start-storybook -p 6006",
+    "predeploy-storybook": "npm run build-storybook",
+    "deploy-storybook": "gh-pages -d storybook-static",
     "build-storybook": "build-storybook"
   },
   "repository": {
@@ -63,6 +65,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.3.0",
+    "gh-pages": "^4.0.0",
     "jest": "^27.4.7",
     "jest-expect-json": "^0.1.1",
     "jest-mock": "^27.5.1",
