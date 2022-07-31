@@ -19,6 +19,7 @@ export {
 	ResizeBoxRatio,
 } from './containBox';
 export {
+	useCanvas,
 	useLayer,
 	CanvasDrawInterface,
 	OnDraw,
