@@ -8,17 +8,22 @@ import React, { useRef } from 'react';
 import CanvasBase, { CanvasBaseTypeProps, HTMLCanvasProps } from './CanvasBase';
 import useContainBox, { ResizeBoxRatio } from './containBox';
 
-export type HTMLDivProps = React.DetailedHTMLProps<
-	React.HTMLAttributes<HTMLDivElement>,
-	HTMLDivElement
->;
-
 export type CanvasResizeTypeProps = Omit<
 	CanvasBaseTypeProps,
 	'width' | 'height'
 >;
 
-export interface CanvasResizeProps extends CanvasResizeTypeProps, HTMLDivProps {
+export type HTMLDivProps = React.DetailedHTMLProps<
+	React.HTMLAttributes<HTMLDivElement>,
+	HTMLDivElement
+>;
+
+type SafeDivProps = Omit<
+	HTMLDivProps,
+	keyof CanvasResizeTypeProps | 'canvasProps' | 'ratio'
+>;
+
+export interface CanvasResizeProps extends SafeDivProps, CanvasResizeTypeProps {
 	canvasProps?: HTMLCanvasProps;
 	ratio?: ResizeBoxRatio;
 }

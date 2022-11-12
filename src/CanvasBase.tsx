@@ -35,7 +35,11 @@ export interface CanvasBaseTypeProps {
 	onResize?: ResizeFn;
 }
 
-export interface CanvasBaseProps extends HTMLCanvasProps, CanvasBaseTypeProps {
+type SafeCanvasProps = Omit<
+	HTMLCanvasProps,
+	keyof CanvasBaseTypeProps | 'height' | 'width'
+>;
+export interface CanvasBaseProps extends SafeCanvasProps, CanvasBaseTypeProps {
 	height?: number | string | undefined;
 	width?: number | string | undefined;
 }
